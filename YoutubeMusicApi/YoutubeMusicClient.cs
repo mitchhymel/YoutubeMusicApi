@@ -120,20 +120,9 @@ namespace YoutubeMusicApi
         {
             string url = GetYTMUrl("browse");
 
-            var data = JObject.FromObject(new
-            {
-                browseEndpointContextSupportedConfigs = new 
-                {
-                    browseEndpointContextMusicConfig = new
-                    {
-                        pageType = "MUSIC_PAGE_TYPE_ARTIST"
-                    }
-                },
-                browseId = id
-            });
+            var data = PrepareBrowse("ARTIST", id);
 
-            var resp = await Post<JObject>(url, data);
-            return resp;
+            return await Post<JObject>(url, data);
         }
 
         #endregion
@@ -150,6 +139,38 @@ namespace YoutubeMusicApi
 
             return await AuthedPost<JObject>(url, data);
         }
+
+        public async Task<JObject> GetPlaylist(string id)
+        {
+            string url = GetYTMUrl("browse");
+            var data = PrepareBrowse("PLAYLIST", id);
+            return await AuthedPost<JObject>(url, data);
+        }
+
+        public async Task<JObject> CreatePlaylist(string title, string description, string privacyStatus, List<string> videoIds = null, string sourcePlaylist = null)
+        {
+            string url = GetYTMUrl("playlist/create");
+            var data = JObject.FromObject(new
+            {
+                title = title,
+                description = description,
+                privacyStatus = privacyStatus,
+                // videoIds = videoIds,
+                // sourcePlaylist = sourcePlaylist
+            });
+            return await AuthedPost<JObject>(url, data);
+        }
+
+        public async Task<JObject> DeletePlaylist(string playlistId)
+        {
+            string url = GetYTMUrl("playlist/delete");
+            var data = JObject.FromObject(new
+            {
+                playlistId = playlistId
+            });
+            return await AuthedPost<JObject>(url, data);
+        }
+
         #endregion
 
         #region Search
@@ -252,6 +273,21 @@ namespace YoutubeMusicApi
         private string GetYTMUrl(string endpoint)
         {
             return $"{BaseUrl}/{endpoint}{Params}";
+        }
+
+        private JObject PrepareBrowse(string endpoint, string id)
+        {
+            return JObject.FromObject(new
+            {
+                browseEndpointContextSupportedConfigs = new
+                {
+                    browseEndpointContextMusicConfig = new
+                    {
+                        pageType = $"MUSIC_PAGE_TYPE_{endpoint}"
+                    }
+                },
+                browseId = id
+            });
         }
 
         #endregion

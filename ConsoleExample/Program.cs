@@ -13,7 +13,7 @@ namespace ConsoleExample
             YoutubeMusicClient api = new YoutubeMusicClient();
             api.LoginWithCookie(Secrets.COOKIE);
 
-            var res = await api.GetLikedPlaylists();
+            var res = await api.CreatePlaylist("AAAA my new playlist", "something", "PRIVATE");
 
 
             Console.WriteLine("Done");
