@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YoutubeMusicApi", "YoutubeMusicApi\YoutubeMusicApi.csproj", "{549765FA-C485-4EAC-AB83-D5371A598CDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleExample", "ConsoleExample\ConsoleExample.csproj", "{2F353793-1282-4C50-B1AB-59E58F2C113A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{549765FA-C485-4EAC-AB83-D5371A598CDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{549765FA-C485-4EAC-AB83-D5371A598CDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{549765FA-C485-4EAC-AB83-D5371A598CDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{549765FA-C485-4EAC-AB83-D5371A598CDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F353793-1282-4C50-B1AB-59E58F2C113A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F353793-1282-4C50-B1AB-59E58F2C113A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F353793-1282-4C50-B1AB-59E58F2C113A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F353793-1282-4C50-B1AB-59E58F2C113A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AE957993-D1F6-4EF5-9E2E-44655D868952}
+	EndGlobalSection
+EndGlobal
