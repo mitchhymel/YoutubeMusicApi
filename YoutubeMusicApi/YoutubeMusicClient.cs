@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoutubeMusicApi.Models;
+using YoutubeMusicApi.Models.Generated;
 
 namespace YoutubeMusicApi
 {
@@ -171,11 +172,21 @@ namespace YoutubeMusicApi
             return await AuthedPost<JObject>(url, data);
         }
 
+        public async Task<JObject> RemovePlaylistItems(string playlistId,  List<object> videos)
+        {
+            string url = GetYTMUrl("browse/edit_playlist");
+            var data = JObject.FromObject(new
+            {
+
+            });
+            return await AuthedPost<JObject>(url, data);
+        }
+
         #endregion
 
         #region Search
 
-        public async Task<JObject> Search(string search)
+        public async Task<SearchResult> Search(string search, SearchResultType filter = SearchResultType.All, bool authRequired = false)
         {
             string url = GetYTMUrl("search");
 
@@ -184,7 +195,56 @@ namespace YoutubeMusicApi
                 query = search
             });
 
-            return await Post<JObject>(url, data);
+
+            if (filter != SearchResultType.All)
+            {
+                string param1 = "Eg-KAQwIA";
+                string param3 = "MABqChAEEAMQCRAFEAo%3D";
+                string parameters = "";
+
+                if (filter == SearchResultType.Upload)
+                {
+                    parameters = "agIYAw%3D%3D";
+                }
+                else
+                {
+                    string param2 = "";
+                    switch (filter)
+                    {
+                        case SearchResultType.Album:
+                            param2 = "BAAGAEgACgA";
+                            break;
+                        case SearchResultType.Artist:
+                            param2 = "BAAGAAgASgA";
+                            break;
+                        case SearchResultType.Playlist:
+                            param2 = "BAAGAAgACgB";
+                            break;
+                        case SearchResultType.Song:
+                            param2 = "RAAGAAgACgA"; // not sure if this is right, python code has this under else case but not explicitly for songs
+                            break;
+                        case SearchResultType.Video:
+                            param2 = "BABGAAgACgA";
+                            break;
+                        case SearchResultType.Upload:
+                            param2 = "RABGAEgASgB"; // not sure if this is right, uploads should never get here due to above if clause
+                            break;
+                        default:
+                            throw new Exception($"Unsupported search filter type: {filter}");
+                    }
+
+                    parameters = param1 + param2 + param3;
+                }
+
+                data.Add("params", parameters);
+            }
+
+
+            GeneratedSearchResult result = await Post<GeneratedSearchResult>(url, data, authRequired: authRequired);
+
+            SearchResult results = SearchResult.ParseResultListFromGenerated(result, filter);
+            
+            return results;
         }
         #endregion
 
