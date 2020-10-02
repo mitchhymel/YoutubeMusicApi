@@ -195,56 +195,60 @@ namespace YoutubeMusicApi
                 query = search
             });
 
-
             if (filter != SearchResultType.All)
             {
-                string param1 = "Eg-KAQwIA";
-                string param3 = "MABqChAEEAMQCRAFEAo%3D";
-                string parameters = "";
-
-                if (filter == SearchResultType.Upload)
-                {
-                    parameters = "agIYAw%3D%3D";
-                }
-                else
-                {
-                    string param2 = "";
-                    switch (filter)
-                    {
-                        case SearchResultType.Album:
-                            param2 = "BAAGAEgACgA";
-                            break;
-                        case SearchResultType.Artist:
-                            param2 = "BAAGAAgASgA";
-                            break;
-                        case SearchResultType.Playlist:
-                            param2 = "BAAGAAgACgB";
-                            break;
-                        case SearchResultType.Song:
-                            param2 = "RAAGAAgACgA"; // not sure if this is right, python code has this under else case but not explicitly for songs
-                            break;
-                        case SearchResultType.Video:
-                            param2 = "BABGAAgACgA";
-                            break;
-                        case SearchResultType.Upload:
-                            param2 = "RABGAEgASgB"; // not sure if this is right, uploads should never get here due to above if clause
-                            break;
-                        default:
-                            throw new Exception($"Unsupported search filter type: {filter}");
-                    }
-
-                    parameters = param1 + param2 + param3;
-                }
-
+                string parameters = GetSearchParamStringFromFilter(filter);
                 data.Add("params", parameters);
             }
-
 
             GeneratedSearchResult result = await Post<GeneratedSearchResult>(url, data, authRequired: authRequired);
 
             SearchResult results = SearchResult.ParseResultListFromGenerated(result, filter);
             
             return results;
+        }
+
+        private string GetSearchParamStringFromFilter(SearchResultType filter)
+        {
+            string param1 = "Eg-KAQwIA";
+            string param3 = "MABqChAEEAMQCRAFEAo%3D";
+            string parameters = "";
+
+            if (filter == SearchResultType.Upload)
+            {
+                parameters = "agIYAw%3D%3D";
+            }
+            else
+            {
+                string param2 = "";
+                switch (filter)
+                {
+                    case SearchResultType.Album:
+                        param2 = "BAAGAEgACgA";
+                        break;
+                    case SearchResultType.Artist:
+                        param2 = "BAAGAAgASgA";
+                        break;
+                    case SearchResultType.Playlist:
+                        param2 = "BAAGAAgACgB";
+                        break;
+                    case SearchResultType.Song:
+                        param2 = "RAAGAAgACgA"; // not sure if this is right, python code has this under else case but not explicitly for songs
+                        break;
+                    case SearchResultType.Video:
+                        param2 = "BABGAAgACgA";
+                        break;
+                    case SearchResultType.Upload:
+                        param2 = "RABGAEgASgB"; // not sure if this is right, uploads should never get here due to above if clause
+                        break;
+                    default:
+                        throw new Exception($"Unsupported search filter type: {filter}");
+                }
+
+                parameters = param1 + param2 + param3;
+            }
+
+            return parameters;
         }
         #endregion
 
