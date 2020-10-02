@@ -624,6 +624,9 @@ namespace YoutubeMusicApi.Models.Generated
 
         [JsonProperty("overlay")]
         public Overlay Overlay { get; set; }
+
+        [JsonProperty("fixedColumns")]
+        public List<FlexColumn> FixedColumns { get; set; }
     }
 
     public class BottomText

@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YoutubeMusicApi.Models;
 using YoutubeMusicApi.Models.Generated;
+using YoutubeMusicApi.Models.Logging;
 
 namespace YoutubeMusicApi
 {
@@ -73,12 +74,14 @@ namespace YoutubeMusicApi
             }
         });
 
-        public AuthHeaders AuthHeaders;
+        public AuthHeaders AuthHeaders { get; private set; }
+        public ILogger Logger { get; set; }
 
-        public YoutubeMusicClient()
+        public YoutubeMusicClient(ILogger logger = null)
         {
             // init to default values w/o a cookie
             AuthHeaders = new AuthHeaders();
+            Logger = logger;
         }
 
         #region Authentication
@@ -201,6 +204,14 @@ namespace YoutubeMusicApi
                 data.Add("params", parameters);
             }
 
+            if (filter == SearchResultType.Upload)
+            {
+                // if we're explicitly looking for uploads... then make sure auth is required
+                // if you call this with just search all and no auth, then the results
+                // won't include uploads
+                authRequired = true;
+            }
+
             GeneratedSearchResult result = await Post<GeneratedSearchResult>(url, data, authRequired: authRequired);
 
             SearchResult results = SearchResult.ParseResultListFromGenerated(result, filter);
@@ -254,17 +265,19 @@ namespace YoutubeMusicApi
 
         #region Requests
 
-        private async Task<T> Get<T>(string url, NameValueCollection additionalParams = null)
+        private async Task<T> Get<T>(string url)
         {
             HttpClient client = GetHttpClient();
 
+            Log($"GET: {url}");
             var response = await client.GetAsync(url);
             var responseString = await response.Content.ReadAsStringAsync();
+            Log($"\tRESPONSE: {responseString}");
             T result = JsonConvert.DeserializeObject<T>(responseString);
             return result;
         }
 
-        private async Task<T> Post<T>(string url, JObject data, NameValueCollection additionalParams = null, bool authRequired = false)
+        private async Task<T> Post<T>(string url, JObject data,  bool authRequired = false)
         {
             HttpClient client = GetHttpClient(authRequired: authRequired);
 
@@ -272,20 +285,23 @@ namespace YoutubeMusicApi
             string requestBody = data.ToString();
             HttpContent content = new StringContent(requestBody, System.Text.Encoding.UTF8, "application/json");
 
+            Log($"POST: {url}");
+            Log($"\tBODY: {requestBody}");
             var response = await client.PostAsync(url, content);
             var responseString = await response.Content.ReadAsStringAsync();
+            Log($"\tRESPONSE: {responseString}");
             T result = JsonConvert.DeserializeObject<T>(responseString);
             return result;
         }
 
-        private async Task<T> AuthedPost<T>(string url, JObject data, NameValueCollection additionalParams = null)
+        private async Task<T> AuthedPost<T>(string url, JObject data)
         {
             if (!IsAuthed())
             {
                 throw new Exception("Trying to make a request that requires authentication while not authenticated");
             }
 
-            return await Post<T>(url, data, additionalParams, authRequired: true);
+            return await Post<T>(url, data, authRequired: true);
         }
 
         private HttpClient GetHttpClient(bool authRequired = false)
@@ -352,6 +368,14 @@ namespace YoutubeMusicApi
                 },
                 browseId = id
             });
+        }
+
+        private void Log(string str)
+        {
+            if (Logger != null)
+            {
+                Logger.Log(str);
+            }
         }
 
         #endregion

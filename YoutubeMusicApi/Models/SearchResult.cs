@@ -18,7 +18,7 @@ namespace YoutubeMusicApi.Models
     }
 
     public enum UploadType
-    { 
+    {
         Song,
         Artist,
         Album,
@@ -57,7 +57,7 @@ namespace YoutubeMusicApi.Models
                 }
             }
 
-            List<Content2> results = renderer.Contents;
+            List<Content> results = renderer.Contents;
 
             //if (results.Count == 1)
             //{
@@ -73,65 +73,81 @@ namespace YoutubeMusicApi.Models
                 }
 
                 var innerResults = res.MusicShelfRenderer.Contents;
-                int defaultIndex = filter == SearchResultType.All ? 1 : 0;
                 foreach (var innerContent in innerResults)
                 {
-                    SearchResultType type = GetSearchResultType(innerContent);
-
-                    switch (type)
-                    {
-                        case SearchResultType.Album:
-                            ret.Albums.Add(new AlbumResult(innerContent));
-                            break;
-                        case SearchResultType.Artist:
-                            ret.Artists.Add(new ArtistResult(innerContent));
-                            break;
-                        case SearchResultType.Playlist:
-                            ret.Playlists.Add(new PlaylistResult(innerContent, defaultIndex));
-                            break;
-                        case SearchResultType.Song:
-                            ret.Songs.Add(new SongResult(innerContent, defaultIndex));
-                            break;
-                        case SearchResultType.Upload:
-                            UploadType ut = GetUploadType(innerContent);
-                            if (ut == UploadType.Song)
-                            {
-                                ret.UploadedSongs.Add(new UploadedSongResult(innerContent));
-                            }
-                            else if (ut == UploadType.Artist)
-                            {
-                                ret.UploadedArtists.Add(new UploadedArtistResult(innerContent));
-                            }
-                            else if (ut == UploadType.Album)
-                            {
-                                ret.UploadedAlbums.Add(new UploadedAlbumResult(innerContent));
-                            }
-                            else
-                            {
-                                throw new Exception("Unsupported upload type");
-                            }
-                            break;
-                        case SearchResultType.Video:
-                            ret.Videos.Add(new VideoResult(innerContent, defaultIndex));
-                            break;
-                        default:
-                            throw new Exception("Unsupported type when parsing generated result");
-                    }
-
+                    ParseInnerContent(ret, innerContent, filter);
                 }
             }
 
             return ret;
         }
 
-        public static UploadType GetUploadType(Content3 content)
+        private static void ParseInnerContent(SearchResult ret, Content content, SearchResultType filter)
         {
-            var browseId = content.MusicResponsiveListItemRenderer.NavigationEndpoint.BrowseEndpoint.BrowseId;
+            SearchResultType type = ContentStaticHelpers.GetSearchResultType(content);
+            int defaultIndex = filter == SearchResultType.All ? 1 : 0;
+
+            switch (type)
+            {
+                case SearchResultType.Album:
+                    ret.Albums.Add(new AlbumResult(content));
+                    break;
+                case SearchResultType.Artist:
+                    ret.Artists.Add(new ArtistResult(content));
+                    break;
+                case SearchResultType.Playlist:
+                    ret.Playlists.Add(new PlaylistResult(content, defaultIndex));
+                    break;
+                case SearchResultType.Song:
+                    ret.Songs.Add(new SongResult(content, defaultIndex));
+                    break;
+                case SearchResultType.Upload:
+                    UploadType ut = ContentStaticHelpers.GetUploadType(content);
+                    if (ut == UploadType.Song)
+                    {
+                        ret.UploadedSongs.Add(new UploadedSongResult(content));
+                    }
+                    else if (ut == UploadType.Artist)
+                    {
+                        ret.UploadedArtists.Add(new UploadedArtistResult(content));
+                    }
+                    else if (ut == UploadType.Album)
+                    {
+                        ret.UploadedAlbums.Add(new UploadedAlbumResult(content));
+                    }
+                    else
+                    {
+                        throw new Exception("Unsupported upload type");
+                    }
+                    break;
+                case SearchResultType.Video:
+                    ret.Videos.Add(new VideoResult(content, defaultIndex));
+                    break;
+                default:
+                    throw new Exception("Unsupported type when parsing generated result");
+            }
+        }
+    }
+
+    public class ContentStaticHelpers
+    {
+        public static UploadType GetUploadType(Content content)
+        {
+            string browseId = null;
+            if (HasTopLevelNavigationEndpoint(content))
+            {
+                browseId = content.MusicResponsiveListItemRenderer.NavigationEndpoint.BrowseEndpoint.BrowseId;
+            }
+            else if (HasBrowseIdInRuns(content))
+            {
+                browseId = content.MusicResponsiveListItemRenderer.FlexColumns[0].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[0].NavigationEndpoint.BrowseEndpoint.BrowseId;
+            }
+
             if (browseId == null)
             {
                 return UploadType.Song;
             }
-            
+
             if (browseId.Contains("artist"))
             {
                 return UploadType.Artist;
@@ -141,7 +157,42 @@ namespace YoutubeMusicApi.Models
             return UploadType.Album;
         }
 
-        public static SearchResultType GetSearchResultType(Content3 content)
+        public static bool HasTopLevelNavigationEndpoint(Content content)
+        {
+            return content.MusicResponsiveListItemRenderer.NavigationEndpoint != null
+                && content.MusicResponsiveListItemRenderer.NavigationEndpoint.BrowseEndpoint != null;
+        }
+
+        public static bool HasBrowseIdInRuns(Content content)
+        {
+            var flexColumns = content.MusicResponsiveListItemRenderer.FlexColumns;
+            if (flexColumns.Count <= 0)
+            {
+                return false;
+            }
+
+            var renderer = flexColumns[0];
+            if (renderer == null)
+            {
+                return false;
+            }
+
+            var runs = renderer.MusicResponsiveListItemFlexColumnRenderer.Text.Runs;
+            if (runs.Count <= 0)
+            {
+                return false;
+            }
+
+            var navEndpoint = runs[0].NavigationEndpoint;
+            if (navEndpoint == null)
+            {
+                return false;
+            }
+
+            return navEndpoint.BrowseEndpoint != null;
+        }
+
+        public static SearchResultType GetSearchResultType(Content content)
         {
             int indexOfType = 1;
             var typeRuns = content.MusicResponsiveListItemRenderer.FlexColumns[indexOfType].MusicResponsiveListItemFlexColumnRenderer.Text.Runs;
@@ -156,14 +207,22 @@ namespace YoutubeMusicApi.Models
             SearchResultType type;
             if (!Enum.TryParse<SearchResultType>(typeStr, out type))
             {
-                // if we couldn't parse, assume it's an album since these can be multiple values like 'Single', 'EP', etc.
+                // if we couldn't parse, it could be an upload,
+                if (typeRuns[0].NavigationEndpoint != null 
+                    && typeRuns[0].NavigationEndpoint.BrowseEndpoint.BrowseId != null 
+                    && typeRuns[0].NavigationEndpoint.BrowseEndpoint.BrowseId.Contains("privately_owned"))
+                {
+                    return SearchResultType.Upload;
+                }
+
+                // if we couldn't parse and it wasn't an upload, assume it's an album since these can be multiple values like 'Single', 'EP', etc.
                 type = SearchResultType.Album;
             }
 
             return type;
         }
 
-        public static List<Thumbnail> GetThumbnails(Content3 content)
+        public static List<Thumbnail> GetThumbnails(Content content)
         {
             List<Thumbnail> thumbnails = new List<Thumbnail>();
             content.MusicResponsiveListItemRenderer.Thumbnail.MusicThumbnailRenderer.Thumbnail.Thumbnails.ForEach(x => thumbnails.Add(new Thumbnail()
@@ -187,9 +246,9 @@ namespace YoutubeMusicApi.Models
         private static readonly int IndexInRuns = 0;
         private static readonly int IndexInColumnsForArtistName = 0;
 
-        public ArtistResult(Content3 content)
+        public ArtistResult(Content content)
         {
-            Thumbnails = SearchResult.GetThumbnails(content);
+            Thumbnails = ContentStaticHelpers.GetThumbnails(content);
             BrowseId = content.MusicResponsiveListItemRenderer.NavigationEndpoint.BrowseEndpoint.BrowseId;
             Artist = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForArtistName].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
         }
@@ -211,9 +270,9 @@ namespace YoutubeMusicApi.Models
         private static readonly int IndexInColumnsForArtist = 2;
         private static readonly int IndexInColumnsForYear = 3;
 
-        public AlbumResult(Content3 content)
+        public AlbumResult(Content content)
         {
-            Thumbnails = SearchResult.GetThumbnails(content);
+            Thumbnails = ContentStaticHelpers.GetThumbnails(content);
             BrowseId = content.MusicResponsiveListItemRenderer.NavigationEndpoint.BrowseEndpoint.BrowseId;
             Title = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForTitle].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
             AlbumType = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForAlbumType].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
@@ -246,9 +305,9 @@ namespace YoutubeMusicApi.Models
         private static readonly int IndexInColumnsForAuthor = 1;
         private static readonly int IndexInColumnsForItemCount = 2;
 
-        public PlaylistResult(Content3 content, int defaultIndex)
+        public PlaylistResult(Content content, int defaultIndex)
         {
-            Thumbnails = SearchResult.GetThumbnails(content);
+            Thumbnails = ContentStaticHelpers.GetThumbnails(content);
             BrowseId = content.MusicResponsiveListItemRenderer.NavigationEndpoint.BrowseEndpoint.BrowseId;
             Title = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForTitle].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
             Author = content.MusicResponsiveListItemRenderer.FlexColumns[defaultIndex + IndexInColumnsForAuthor].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
@@ -274,9 +333,9 @@ namespace YoutubeMusicApi.Models
         private static readonly int IndexInColumnsForAlbum = 2;
         private static readonly int IndexInColumnsForDuration = 3;
 
-        public SongResult(Content3 content, int defaultIndex)
+        public SongResult(Content content, int defaultIndex)
         {
-            Thumbnails = SearchResult.GetThumbnails(content);
+            Thumbnails = ContentStaticHelpers.GetThumbnails(content);
             VideoId = content.MusicResponsiveListItemRenderer.Overlay.MusicItemThumbnailOverlayRenderer.Content.MusicPlayButtonRenderer.PlayNavigationEndpoint.WatchEndpoint.VideoId;
             Params = content.MusicResponsiveListItemRenderer.Overlay.MusicItemThumbnailOverlayRenderer.Content.MusicPlayButtonRenderer.PlayNavigationEndpoint.WatchEndpoint.Params;
 
@@ -315,12 +374,12 @@ namespace YoutubeMusicApi.Models
         private static readonly int IndexInColumnsForAlbum = 2;
         private static readonly int IndexInColumnsForDuration = 3;
 
-        public UploadedSongResult(Content3 content)
+        public UploadedSongResult(Content content)
         {
-            Thumbnails = SearchResult.GetThumbnails(content);
+            Thumbnails = ContentStaticHelpers.GetThumbnails(content);
             Title = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForTitle].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
-            VideoId = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForVideoId].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].WatchEndpoint.VideoId;
-            PlaylistId = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForPlaylistId].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].WatchEndpoint.PlaylistId;
+            VideoId = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForVideoId].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].NavigationEndpoint.WatchEndpoint.VideoId;
+            PlaylistId = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForPlaylistId].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].NavigationEndpoint.WatchEndpoint.PlaylistId;
 
             var artist = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForArtist].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns];
             Artist = new IdNamePair(artist.NavigationEndpoint.BrowseEndpoint.BrowseId, artist.Text);
@@ -328,7 +387,21 @@ namespace YoutubeMusicApi.Models
             var album = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForAlbum].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns];
             Album = new IdNamePair(album.NavigationEndpoint.BrowseEndpoint.BrowseId, album.Text);
 
-            Duration = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForDuration].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
+            var flexColumnCount = content.MusicResponsiveListItemRenderer.FlexColumns.Count;
+            if (flexColumnCount >= 4)
+            {
+                Duration = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForDuration].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
+            }
+            else
+            {
+                //duration might be in fixedColumns
+                if (content.MusicResponsiveListItemRenderer.FixedColumns != null
+                    && content.MusicResponsiveListItemRenderer.FixedColumns.Count > 0
+                    && content.MusicResponsiveListItemRenderer.FixedColumns[0].MusicResponsiveListItemFlexColumnRenderer != null)
+                {
+                    Duration = content.MusicResponsiveListItemRenderer.FixedColumns[0].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[0].Text;
+                }
+            }
         }
     }
 
@@ -343,9 +416,9 @@ namespace YoutubeMusicApi.Models
         private static readonly int IndexInRuns = 0;
         private static readonly int IndexInColumnsForTitle = 0;
 
-        public UploadedArtistResult(Content3 content)
+        public UploadedArtistResult(Content content)
         {
-            Thumbnails = SearchResult.GetThumbnails(content);
+            Thumbnails = ContentStaticHelpers.GetThumbnails(content);
             BrowseId = content.MusicResponsiveListItemRenderer.NavigationEndpoint.BrowseEndpoint.BrowseId;
             Title = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForTitle].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
         }
@@ -366,9 +439,9 @@ namespace YoutubeMusicApi.Models
         private static readonly int IndexInColumnsForArtist = 2;
         private static readonly int IndexInColumnsForReleaseDate = 4;
 
-        public UploadedAlbumResult(Content3 content)
+        public UploadedAlbumResult(Content content)
         {
-            Thumbnails = SearchResult.GetThumbnails(content);
+            Thumbnails = ContentStaticHelpers.GetThumbnails(content);
             BrowseId = content.MusicResponsiveListItemRenderer.NavigationEndpoint.BrowseEndpoint.BrowseId;
             Title = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForTitle].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
 
@@ -406,9 +479,9 @@ namespace YoutubeMusicApi.Models
         private static readonly int IndexInColumnsForViews = 2;
         private static readonly int IndexInColumnsForDuration = 3;
 
-        public VideoResult(Content3 content, int defaultIndex)
+        public VideoResult(Content content, int defaultIndex)
         {
-            Thumbnails = SearchResult.GetThumbnails(content);
+            Thumbnails = ContentStaticHelpers.GetThumbnails(content);
             VideoId = content.MusicResponsiveListItemRenderer.Overlay.MusicItemThumbnailOverlayRenderer.Content.MusicPlayButtonRenderer.PlayNavigationEndpoint.WatchEndpoint.VideoId;
             Params = content.MusicResponsiveListItemRenderer.Overlay.MusicItemThumbnailOverlayRenderer.Content.MusicPlayButtonRenderer.PlayNavigationEndpoint.WatchEndpoint.Params;
 

@@ -3,6 +3,7 @@ using System;
 using System.Threading.Tasks;
 using YoutubeMusicApi;
 using YoutubeMusicApi.Models;
+using YoutubeMusicApi.Models.Logging;
 
 namespace ConsoleExample
 {
@@ -15,7 +16,7 @@ namespace ConsoleExample
             YoutubeMusicClient api = new YoutubeMusicClient();
             api.LoginWithCookie(Secrets.COOKIE);
 
-            var res = await api.Search("Neverkept", filter: SearchResultType.Album);
+            var res = await api.Search("The New Age", SearchResultType.Upload);
             Console.WriteLine(JsonConvert.SerializeObject(res));
 
             Console.WriteLine("Done");
