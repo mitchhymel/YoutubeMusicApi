@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace YoutubeMusicApi.Models.Generated
+namespace YoutubeMusicApi.Models.Search
 {
     public class Param
     {

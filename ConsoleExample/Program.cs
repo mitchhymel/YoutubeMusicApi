@@ -3,7 +3,8 @@ using System;
 using System.Threading.Tasks;
 using YoutubeMusicApi;
 using YoutubeMusicApi.Models;
-using YoutubeMusicApi.Models.Logging;
+using YoutubeMusicApi.Logging;
+using YoutubeMusicApi.Models.Search;
 
 namespace ConsoleExample
 {

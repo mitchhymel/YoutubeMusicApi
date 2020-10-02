@@ -2,16 +2,15 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using YoutubeMusicApi.Logging;
 using YoutubeMusicApi.Models;
-using YoutubeMusicApi.Models.Generated;
-using YoutubeMusicApi.Models.Logging;
+using YoutubeMusicApi.Models.Search;
 
 namespace YoutubeMusicApi
 {

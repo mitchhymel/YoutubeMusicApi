@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace YoutubeMusicApi.Models.Logging
+namespace YoutubeMusicApi.Logging
 {
     public class ConsoleLogger : ILogger
     {
