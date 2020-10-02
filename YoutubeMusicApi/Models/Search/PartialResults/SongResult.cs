@@ -14,10 +14,14 @@ namespace YoutubeMusicApi.Models.Search
         public List<IdNamePair> Artists { get; set; } = new List<IdNamePair>();
         public IdNamePair Album { get; set; }
         public string Duration { get; set; }
+        public bool IsUpload { get; set; }
+        public string PlaylistId { get; set; }
 
 
         private static readonly int IndexInRuns = 0;
         private static readonly int IndexInColumnsForTitle = 0;
+        private static readonly int IndexInColumnsForPlaylistId = 0;
+        private static readonly int IndexInColumnsForVideoId = 0;
         private static readonly int IndexInColumnsForArtists = 1;
         private static readonly int IndexInColumnsForAlbum = 2;
         private static readonly int IndexInColumnsForDuration = 3;
@@ -25,21 +29,45 @@ namespace YoutubeMusicApi.Models.Search
         public SongResult(Content content, int defaultIndex)
         {
             Thumbnails = ContentStaticHelpers.GetThumbnails(content);
-            VideoId = content.MusicResponsiveListItemRenderer.Overlay.MusicItemThumbnailOverlayRenderer.Content.MusicPlayButtonRenderer.PlayNavigationEndpoint.WatchEndpoint.VideoId;
-            Params = content.MusicResponsiveListItemRenderer.Overlay.MusicItemThumbnailOverlayRenderer.Content.MusicPlayButtonRenderer.PlayNavigationEndpoint.WatchEndpoint.Params;
-
             Title = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForTitle].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
-            content.MusicResponsiveListItemRenderer.FlexColumns[defaultIndex + IndexInColumnsForArtists].MusicResponsiveListItemFlexColumnRenderer.Text.Runs.ForEach(x => Artists.Add(new IdNamePair(x.NavigationEndpoint.BrowseEndpoint.BrowseId, x.Text)));
 
+            // Get artists first, so we can know if this is uploaded or not
+            content.MusicResponsiveListItemRenderer.FlexColumns[defaultIndex + IndexInColumnsForArtists].MusicResponsiveListItemFlexColumnRenderer.Text.Runs.ForEach(x => Artists.Add(new IdNamePair(x.NavigationEndpoint.BrowseEndpoint.BrowseId, x.Text)));
+            IsUpload = ContentStaticHelpers.BrowseIdIndicatedUpload(Artists[0].Id);
+            if (IsUpload)
+            {
+                VideoId = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForVideoId].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].NavigationEndpoint.WatchEndpoint.VideoId;
+                PlaylistId = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForPlaylistId].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].NavigationEndpoint.WatchEndpoint.PlaylistId;
+            }
+            else
+            {
+                VideoId = content.MusicResponsiveListItemRenderer.Overlay.MusicItemThumbnailOverlayRenderer.Content.MusicPlayButtonRenderer.PlayNavigationEndpoint.WatchEndpoint.VideoId;
+                Params = content.MusicResponsiveListItemRenderer.Overlay.MusicItemThumbnailOverlayRenderer.Content.MusicPlayButtonRenderer.PlayNavigationEndpoint.WatchEndpoint.Params;
+            }
+
+            var flexColumnCount = content.MusicResponsiveListItemRenderer.FlexColumns.Count;
+            
             // may not have an album
-            if (content.MusicResponsiveListItemRenderer.FlexColumns.Count == (4 + defaultIndex))
+            if (flexColumnCount >= (defaultIndex + IndexInColumnsForAlbum + 1))
             {
                 var albumRun = content.MusicResponsiveListItemRenderer.FlexColumns[defaultIndex + IndexInColumnsForAlbum].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns];
                 Album = new IdNamePair(albumRun.NavigationEndpoint.BrowseEndpoint.BrowseId, albumRun.Text);
             }
 
-
-            Duration = content.MusicResponsiveListItemRenderer.FlexColumns[defaultIndex + IndexInColumnsForDuration].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
+            if (flexColumnCount >= (defaultIndex + IndexInColumnsForDuration + 1))
+            {
+                Duration = content.MusicResponsiveListItemRenderer.FlexColumns[defaultIndex + IndexInColumnsForDuration].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
+            }
+            else
+            {
+                //duration might be in fixedColumns
+                if (content.MusicResponsiveListItemRenderer.FixedColumns != null
+                    && content.MusicResponsiveListItemRenderer.FixedColumns.Count > 0
+                    && content.MusicResponsiveListItemRenderer.FixedColumns[0].MusicResponsiveListItemFlexColumnRenderer != null)
+                {
+                    Duration = content.MusicResponsiveListItemRenderer.FixedColumns[0].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[0].Text;
+                }
+            }
         }
     }
 }

@@ -188,8 +188,13 @@ namespace YoutubeMusicApi
 
         #region Search
 
-        public async Task<SearchResult> Search(string search, SearchResultType filter = SearchResultType.All, bool authRequired = false)
+        public async Task<SearchResult> Search(string search, SearchResultType filter = SearchResultType.All)
         {
+            if (filter == SearchResultType.Upload)
+            {
+                throw new Exception("To search uploads, use SearchUploads() method. Uploads will not be returned as a result from Search()");
+            }
+
             string url = GetYTMUrl("search");
 
             JObject data = JObject.FromObject(new 
@@ -203,18 +208,37 @@ namespace YoutubeMusicApi
                 data.Add("params", parameters);
             }
 
-            if (filter == SearchResultType.Upload)
-            {
-                // if we're explicitly looking for uploads... then make sure auth is required
-                // if you call this with just search all and no auth, then the results
-                // won't include uploads
-                authRequired = true;
-            }
-
-            GeneratedSearchResult result = await Post<GeneratedSearchResult>(url, data, authRequired: authRequired);
+            GeneratedSearchResult result = await Post<GeneratedSearchResult>(url, data);
 
             SearchResult results = SearchResult.ParseResultListFromGenerated(result, filter);
             
+            return results;
+        }
+
+        /// <summary>
+        /// Search uploaded songs, artists, albums
+        /// 
+        /// The YTM api does not return results with mixes of uploads and non uploaded tracks, so you
+        /// have to search for uploads specifically
+        /// </summary>
+        /// <param name="search"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> SearchUploads(string search)
+        {
+            string url = GetYTMUrl("search");
+
+            JObject data = JObject.FromObject(new
+            {
+                query = search
+            });
+
+            string parameters = GetSearchParamStringFromFilter(SearchResultType.Upload);
+            data.Add("params", parameters);
+
+            GeneratedSearchResult result = await Post<GeneratedSearchResult>(url, data, authRequired: true);
+
+            SearchResult results = SearchResult.ParseResultListFromGenerated(result, SearchResultType.Upload);
+
             return results;
         }
 
@@ -243,13 +267,13 @@ namespace YoutubeMusicApi
                         param2 = "BAAGAAgACgB";
                         break;
                     case SearchResultType.Song:
-                        param2 = "RAAGAAgACgA"; // not sure if this is right, python code has this under else case but not explicitly for songs
+                        param2 = "RAAGAAgACgA";
                         break;
                     case SearchResultType.Video:
                         param2 = "BABGAAgACgA";
                         break;
                     case SearchResultType.Upload:
-                        param2 = "RABGAEgASgB"; // not sure if this is right, uploads should never get here due to above if clause
+                        param2 = "RABGAEgASgB"; // not sure if this is right, uploads should never get here due to above if clause, but the python code has this
                         break;
                     default:
                         throw new Exception($"Unsupported search filter type: {filter}");

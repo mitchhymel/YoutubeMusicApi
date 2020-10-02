@@ -6,6 +6,50 @@ namespace YoutubeMusicApi.Models.Search
 {
     public class ContentStaticHelpers
     {
+        public static SearchResultType GetSearchResultType(Content content)
+        {
+            int indexOfType = 1;
+            var typeRuns = content.MusicResponsiveListItemRenderer.FlexColumns[indexOfType].MusicResponsiveListItemFlexColumnRenderer.Text.Runs;
+            if (typeRuns == null || typeRuns.Count == 0)
+            {
+                // if it doesn't provide the type there, it's an Upload
+                UploadType ut = GetUploadType(content);
+                switch (ut)
+                {
+                    case UploadType.Album:
+                        return SearchResultType.Album;
+                    case UploadType.Artist:
+                        return SearchResultType.Artist;
+                    case UploadType.Song:
+                        return SearchResultType.Song;
+                    default:
+                        throw new Exception($"Unsupported UploadType when trying to get SearchResultType: {ut}");
+                }
+            }
+
+            string typeStr = typeRuns[0].Text;
+
+            // assume it's an album since these can be multiple values like 'Single', 'EP', etc.
+            SearchResultType type = SearchResultType.Album;
+            if (!Enum.TryParse<SearchResultType>(typeStr, out type))
+            {
+                // if we couldn't parse, it could be a song (uploaded or otherwise),
+                if (typeRuns[0].NavigationEndpoint != null
+                    && typeRuns[0].NavigationEndpoint.BrowseEndpoint.BrowseId != null)
+                {
+                    type = SearchResultType.Song;
+                }
+            }
+
+            // sometimes the string-to-enum mistakenly results in All... assume album
+            if (type == SearchResultType.All)
+            {
+                type = SearchResultType.Album;
+            }
+
+            return type;
+        }
+
         public static UploadType GetUploadType(Content content)
         {
             string browseId = null;
@@ -67,36 +111,6 @@ namespace YoutubeMusicApi.Models.Search
             return navEndpoint.BrowseEndpoint != null;
         }
 
-        public static SearchResultType GetSearchResultType(Content content)
-        {
-            int indexOfType = 1;
-            var typeRuns = content.MusicResponsiveListItemRenderer.FlexColumns[indexOfType].MusicResponsiveListItemFlexColumnRenderer.Text.Runs;
-            if (typeRuns == null || typeRuns.Count == 0)
-            {
-                // if it doesn't provide the type there, it's an Upload
-                return SearchResultType.Upload;
-            }
-
-            string typeStr = typeRuns[0].Text;
-
-            SearchResultType type;
-            if (!Enum.TryParse<SearchResultType>(typeStr, out type))
-            {
-                // if we couldn't parse, it could be an upload,
-                if (typeRuns[0].NavigationEndpoint != null
-                    && typeRuns[0].NavigationEndpoint.BrowseEndpoint.BrowseId != null
-                    && typeRuns[0].NavigationEndpoint.BrowseEndpoint.BrowseId.Contains("privately_owned"))
-                {
-                    return SearchResultType.Upload;
-                }
-
-                // if we couldn't parse and it wasn't an upload, assume it's an album since these can be multiple values like 'Single', 'EP', etc.
-                type = SearchResultType.Album;
-            }
-
-            return type;
-        }
-
         public static List<Thumbnail> GetThumbnails(Content content)
         {
             List<Thumbnail> thumbnails = new List<Thumbnail>();
@@ -108,6 +122,11 @@ namespace YoutubeMusicApi.Models.Search
             }));
 
             return thumbnails;
+        }
+
+        public static bool BrowseIdIndicatedUpload(string browseId)
+        {
+            return browseId.Contains("privately_owned");
         }
     }
 }

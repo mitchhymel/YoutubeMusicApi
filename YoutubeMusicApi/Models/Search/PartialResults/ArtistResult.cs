@@ -9,7 +9,8 @@ namespace YoutubeMusicApi.Models.Search
         public SearchResultType Type { get; set; } = SearchResultType.Artist;
         public List<Thumbnail> Thumbnails { get; set; } = new List<Thumbnail>();
         public string BrowseId { get; set; }
-        public string Artist { get; set; }
+        public string Title { get; set; }
+        public bool IsUpload { get; set; }
 
         private static readonly int IndexInRuns = 0;
         private static readonly int IndexInColumnsForArtistName = 0;
@@ -18,7 +19,8 @@ namespace YoutubeMusicApi.Models.Search
         {
             Thumbnails = ContentStaticHelpers.GetThumbnails(content);
             BrowseId = content.MusicResponsiveListItemRenderer.NavigationEndpoint.BrowseEndpoint.BrowseId;
-            Artist = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForArtistName].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
+            IsUpload = ContentStaticHelpers.BrowseIdIndicatedUpload(BrowseId);
+            Title = content.MusicResponsiveListItemRenderer.FlexColumns[IndexInColumnsForArtistName].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[IndexInRuns].Text;
         }
     }
 }

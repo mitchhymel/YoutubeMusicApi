@@ -1,10 +1,13 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace YoutubeMusicApi.Models.Search
 {
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum SearchResultType
     {
         All,
@@ -16,6 +19,7 @@ namespace YoutubeMusicApi.Models.Search
         Video,
     }
 
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum UploadType
     {
         Song,
@@ -31,10 +35,6 @@ namespace YoutubeMusicApi.Models.Search
         public List<PlaylistResult> Playlists { get; set; } = new List<PlaylistResult>();
         public List<SongResult> Songs { get; set; } = new List<SongResult>();
         public List<VideoResult> Videos { get; set; } = new List<VideoResult>();
-        public List<UploadedSongResult> UploadedSongs { get; set; } = new List<UploadedSongResult>();
-        public List<UploadedArtistResult> UploadedArtists { get; set; } = new List<UploadedArtistResult>();
-        public List<UploadedAlbumResult> UploadedAlbums { get; set; } = new List<UploadedAlbumResult>();
-
 
         public static SearchResult ParseResultListFromGenerated(GeneratedSearchResult result, SearchResultType filter)
         {
@@ -100,30 +100,13 @@ namespace YoutubeMusicApi.Models.Search
                 case SearchResultType.Song:
                     ret.Songs.Add(new SongResult(content, defaultIndex));
                     break;
-                case SearchResultType.Upload:
-                    UploadType ut = ContentStaticHelpers.GetUploadType(content);
-                    if (ut == UploadType.Song)
-                    {
-                        ret.UploadedSongs.Add(new UploadedSongResult(content));
-                    }
-                    else if (ut == UploadType.Artist)
-                    {
-                        ret.UploadedArtists.Add(new UploadedArtistResult(content));
-                    }
-                    else if (ut == UploadType.Album)
-                    {
-                        ret.UploadedAlbums.Add(new UploadedAlbumResult(content));
-                    }
-                    else
-                    {
-                        throw new Exception("Unsupported upload type");
-                    }
-                    break;
                 case SearchResultType.Video:
                     ret.Videos.Add(new VideoResult(content, defaultIndex));
                     break;
+                case SearchResultType.Upload:
+                    throw new Exception("We should not be handling Uploads specifically, Uploads should be handled as the type they are (Album, Artist, Song)");
                 default:
-                    throw new Exception("Unsupported type when parsing generated result");
+                    throw new Exception($"Unsupported type when parsing generated result: {type}");
             }
         }
     }
