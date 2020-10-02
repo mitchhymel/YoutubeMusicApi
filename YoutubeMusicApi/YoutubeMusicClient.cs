@@ -2,12 +2,14 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using YoutubeMusicApi.Logging;
 using YoutubeMusicApi.Models;
 using YoutubeMusicApi.Models.Search;
@@ -286,11 +288,35 @@ namespace YoutubeMusicApi
         }
         #endregion
 
+        #region Songs
+
+        public async Task<Song> GetSong(string videoId)
+        {
+            string url = $"https://www.youtube.com/get_video_info?video_id={videoId}&el=detailpage&hl=en";
+
+            var result = await GetFromQueryStringEndpoint(url);
+
+            return Song.FromNameValueCollection(result);
+        }
+
+        #endregion
+
         #region Requests
 
-        private async Task<T> Get<T>(string url)
+        private async Task<NameValueCollection> GetFromQueryStringEndpoint(string url, bool authRequired = false)
         {
-            HttpClient client = GetHttpClient();
+            HttpClient client = GetHttpClient(authRequired: authRequired);
+
+            Log($"GET: {url}");
+            var response = await client.GetAsync(url);
+            var responseString = await response.Content.ReadAsStringAsync();
+            Log($"\tRESPONSE: {responseString}");
+            return HttpUtility.ParseQueryString(responseString);
+        }
+
+        private async Task<T> Get<T>(string url, bool authRequired = false)
+        {
+            HttpClient client = GetHttpClient(authRequired: authRequired);
 
             Log($"GET: {url}");
             var response = await client.GetAsync(url);
