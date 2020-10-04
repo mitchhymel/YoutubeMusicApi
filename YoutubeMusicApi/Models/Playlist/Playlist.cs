@@ -18,7 +18,7 @@ namespace YoutubeMusicApi.Models
         public List<Thumbnail> Thumbnails { get; set; }
 
         [JsonProperty("count")]
-        public int Count { get; set; }
+        public string Count { get; set; }
         
         
         public static Playlist FromContent(MusicTwoRowItemRenderer renderer)
@@ -31,7 +31,7 @@ namespace YoutubeMusicApi.Models
             
             if (renderer.Subtitle.Runs.Count >= 3)
             {
-                playlist.Count = int.Parse(renderer.Subtitle.Runs[2].Text.Split(" ")[0]);
+                playlist.Count = renderer.Subtitle.Runs[2].Text;
             }
 
             return playlist;

@@ -29,6 +29,9 @@ namespace YoutubeMusicApi.Models.Generated
 
         [JsonProperty("continuationContents")]
         public ContinuationContents ContinuationContents { get; set; }
+
+        [JsonProperty("header")]
+        public Header Header { get; set; }
     }
 
     public class ContinuationContents

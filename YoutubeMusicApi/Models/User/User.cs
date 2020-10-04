@@ -12,36 +12,22 @@ namespace YoutubeMusicApi.Models
         public string Name { get; set; }
 
         [JsonProperty("playlists")]
-        public UserPlaylists Playlists { get; set; }
+        public List<Playlist> Playlists { get; set; } = new List<Playlist>();
 
-        public static User FromBrowseResponse(BrowseResponse result)
+        public static User FromBrowseResponse(BrowseResponse response)
         {
             User user = new User();
 
+            user.Name = response.Header.MusicVisualHeaderRenderer.Title.Runs[0].Text;
+
+            var contents = response.Contents.SingleColumnBrowseResultsRenderer.Tabs[0].TabRenderer.Content.SectionListRenderer.Contents[0].MusicCarouselShelfRenderer.Contents;
+            foreach (var content in contents)
+            {
+                user.Playlists.Add(Playlist.FromContent(content.MusicTwoRowItemRenderer));
+            }
 
             return user;
         }
-    }
-
-    public class UserPlaylist
-    {
-        [JsonProperty("title")]
-        public string Title { get; set; }
-
-        [JsonProperty("playlistId")]
-        public string PlaylistId { get; set; }
-
-        [JsonProperty("thumbnails")]
-        public List<Thumbnail> Thumbnails { get; set; }
-    }
-
-    public class UserPlaylists
-    {
-        [JsonProperty("browseId")]
-        public string BrowseId { get; set; }
-
-        [JsonProperty("results")]
-        public List<UserPlaylist> Results { get; set; }
     }
 
 
