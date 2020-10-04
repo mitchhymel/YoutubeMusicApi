@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Web;
 using YoutubeMusicApi.Logging;
 using YoutubeMusicApi.Models;
+using YoutubeMusicApi.Models.Generated;
 using YoutubeMusicApi.Models.Search;
 
 namespace YoutubeMusicApi
@@ -86,11 +87,9 @@ namespace YoutubeMusicApi
                 data.Add("params", parameters);
             }
 
-            GeneratedSearchResult result = await Post<GeneratedSearchResult>(url, data);
+            BrowseResponse response = await Post<BrowseResponse>(url, data);
 
-            SearchResult results = SearchResult.ParseResultListFromGenerated(result, filter);
-
-            return results;
+            return SearchResult.FromBrowseResponse(response, filter);
         }
 
         /// <summary>
@@ -113,11 +112,9 @@ namespace YoutubeMusicApi
             string parameters = GetSearchParamStringFromFilter(SearchResultType.Upload);
             data.Add("params", parameters);
 
-            GeneratedSearchResult result = await Post<GeneratedSearchResult>(url, data, authRequired: true);
+            BrowseResponse response = await Post<BrowseResponse>(url, data, authRequired: true);
 
-            SearchResult results = SearchResult.ParseResultListFromGenerated(result, SearchResultType.Upload);
-
-            return results;
+            return SearchResult.FromBrowseResponse(response, SearchResultType.Upload);
         }
 
         private string GetSearchParamStringFromFilter(SearchResultType filter)
@@ -166,13 +163,15 @@ namespace YoutubeMusicApi
 
         #region Browsing
 
-        public async Task<JObject> GetArtist(string id)
+        public async Task<SearchResult> GetArtist(string id)
         {
             string url = GetYTMUrl("browse");
 
             var data = PrepareBrowse("ARTIST", id);
 
-            return await Post<JObject>(url, data);
+            var response = await Post<BrowseResponse>(url, data);
+
+            return SearchResult.FromBrowseResponse(response, SearchResultType.All);
         }
 
         public async Task<JObject> GetArtistAlbums(string channelId, string parameters)
@@ -180,9 +179,18 @@ namespace YoutubeMusicApi
             throw new NotImplementedException();
         }
 
-        public async Task<JObject> GetUser(string channelId)
+        public async Task<User> GetUser(string channelId)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse");
+
+            var data = JObject.FromObject(new
+            {
+                browseId = channelId
+            });
+
+            var response = await Post<BrowseResponse>(url, data);
+
+            return User.FromBrowseResponse(response);
         }
 
         public async Task<JObject> GetUserPlaylists(string channelId, string parameters)
@@ -208,9 +216,23 @@ namespace YoutubeMusicApi
 
         #region Library
 
-        public async Task<JObject> GetLibraryPlaylists(int limit = 25)
+        public async Task<PlaylistList> GetLibraryPlaylists(int limit = 25, string continuation=null)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse");
+
+            if (continuation != null)
+            {
+                url += $"&ctoken={continuation}&continuation={continuation}";
+            }
+
+            var data = JObject.FromObject(new
+            {
+                browseId = "FEmusic_liked_playlists"
+            });
+
+            var response = await Post<BrowseResponse>(url, data, authRequired: true);
+
+            return PlaylistList.FromBrowseResponse(response);
         }
 
         public async Task<JObject> GetLibrarySongs(int limit = 25)
@@ -269,34 +291,37 @@ namespace YoutubeMusicApi
 
         public async Task<JObject> GetLikedPlaylists()
         {
-            string url = GetYTMUrl("browse");
-            var data = JObject.FromObject(new
-            {
-                browseId = "FEmusic_liked_playlists"
-            });
+            throw new NotImplementedException();
+            //string url = GetYTMUrl("browse");
+            //var data = JObject.FromObject(new
+            //{
+            //    browseId = "FEmusic_liked_playlists"
+            //});
 
-            return await Post<JObject>(url, data, authRequired: true);
+            //return await Post<JObject>(url, data, authRequired: true);
         }
 
         public async Task<JObject> GetPlaylist(string id)
         {
-            string url = GetYTMUrl("browse");
-            var data = PrepareBrowse("PLAYLIST", id);
-            return await Post<JObject>(url, data);
+            throw new NotImplementedException();
+            //string url = GetYTMUrl("browse");
+            //var data = PrepareBrowse("PLAYLIST", id);
+            //return await Post<JObject>(url, data);
         }
 
         public async Task<JObject> CreatePlaylist(string title, string description, string privacyStatus, List<string> videoIds = null, string sourcePlaylist = null)
         {
-            string url = GetYTMUrl("playlist/create");
-            var data = JObject.FromObject(new
-            {
-                title = title,
-                description = description,
-                privacyStatus = privacyStatus,
-                // videoIds = videoIds,
-                // sourcePlaylist = sourcePlaylist
-            });
-            return await Post<JObject>(url, data, authRequired: true);
+            throw new NotImplementedException();
+            //string url = GetYTMUrl("playlist/create");
+            //var data = JObject.FromObject(new
+            //{
+            //    title = title,
+            //    description = description,
+            //    privacyStatus = privacyStatus,
+            //    // videoIds = videoIds,
+            //    // sourcePlaylist = sourcePlaylist
+            //});
+            //return await Post<JObject>(url, data, authRequired: true);
         }
 
         public async Task<JObject> EditPlaylist(string playlistId, string title = null, string description = null, string privacyStatus = null, Tuple<string, string> moveItem = null, string addPlaylistId = null)
@@ -306,12 +331,13 @@ namespace YoutubeMusicApi
 
         public async Task<JObject> DeletePlaylist(string playlistId)
         {
-            string url = GetYTMUrl("playlist/delete");
-            var data = JObject.FromObject(new
-            {
-                playlistId = playlistId
-            });
-            return await Post<JObject>(url, data, authRequired: true);
+            throw new NotImplementedException();
+            //string url = GetYTMUrl("playlist/delete");
+            //var data = JObject.FromObject(new
+            //{
+            //    playlistId = playlistId
+            //});
+            //return await Post<JObject>(url, data, authRequired: true);
         }
 
         public async Task<JObject> AddPlaylistItems(string playlistId, List<string> videoIds, string sourcePlaylist=null, bool duplicates=false)

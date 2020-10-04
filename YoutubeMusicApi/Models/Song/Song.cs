@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
+using YoutubeMusicApi.Models.Generated;
 
 namespace YoutubeMusicApi.Models
 {
@@ -112,24 +113,6 @@ namespace YoutubeMusicApi.Models
 
             return song;
         }
-    }
-
-    public class Thumbnail
-    {
-        [JsonProperty("url")]
-        public string Url { get; set; }
-
-        [JsonProperty("width")]
-        public int Width { get; set; }
-
-        [JsonProperty("height")]
-        public int Height { get; set; }
-    }
-
-    public class ThumbnailList
-    {
-        [JsonProperty("thumbnails")]
-        public List<Thumbnail> Thumbnails { get; set; }
     }
 
     public class Format

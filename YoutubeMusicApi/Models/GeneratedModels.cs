@@ -3,8 +3,79 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace YoutubeMusicApi.Models.Search
+namespace YoutubeMusicApi.Models.Generated
 {
+    /// <summary>
+    /// Models generated from json responses from YTM endpoints
+    /// with some manual changes to simplify things
+    /// </summary>
+
+    public class BrowseResponse
+    {
+        [JsonProperty("responseContext")]
+        public ResponseContext ResponseContext { get; set; }
+
+        [JsonProperty("estimatedResults")]
+        public string EstimatedResults { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("contents")]
+        public Contents Contents { get; set; }
+
+        [JsonProperty("adSafetyReason")]
+        public AdSafetyReason AdSafetyReason { get; set; }
+
+        [JsonProperty("continuationContents")]
+        public ContinuationContents ContinuationContents { get; set; }
+    }
+
+    public class ContinuationContents
+    {
+        [JsonProperty("gridContinuation")]
+        public SectionListRenderer GridContinuation { get; set; }
+    }
+
+    public class Contents
+    {
+        [JsonProperty("tabbedSearchResultsRenderer")]
+        public TabbedSearchResultsRenderer TabbedSearchResultsRenderer { get; set; }
+
+        [JsonProperty("sectionListRenderer")]
+        public SectionListRenderer SectionListRenderer { get; set; }
+
+        [JsonProperty("singleColumnBrowseResultsRenderer")]
+        public TabbedSearchResultsRenderer SingleColumnBrowseResultsRenderer { get; set; }
+    }
+
+    public class Content
+    {
+        [JsonProperty("sectionListRenderer")]
+        public SectionListRenderer SectionListRenderer { get; set; }
+
+        [JsonProperty("musicPlayButtonRenderer")]
+        public MusicPlayButtonRenderer MusicPlayButtonRenderer { get; set; }
+
+        [JsonProperty("musicResponsiveListItemRenderer")]
+        public MusicResponsiveListItemRenderer MusicResponsiveListItemRenderer { get; set; }
+
+        [JsonProperty("musicShelfRenderer")]
+        public MusicShelfRenderer MusicShelfRenderer { get; set; }
+
+        [JsonProperty("musicCarouselShelfRenderer")]
+        public MusicCarouselShelfRenderer MusicCarouselShelfRenderer { get; set; }
+
+        [JsonProperty("musicTwoRowItemRenderer")]
+        public MusicTwoRowItemRenderer MusicTwoRowItemRenderer { get; set; }
+
+        [JsonProperty("itemSectionRenderer")]
+        public SectionListRenderer ItemSectionRenderer;
+
+        [JsonProperty("gridRenderer")]
+        public SectionListRenderer GridRenderer;
+    }
+
     public class Param
     {
         [JsonProperty("key")]
@@ -63,12 +134,6 @@ namespace YoutubeMusicApi.Models.Search
 
         [JsonProperty("watchEndpoint")]
         public WatchEndpoint WatchEndpoint { get; set; }
-    }
-
-    public class Title
-    {
-        [JsonProperty("runs")]
-        public List<Run> Runs { get; set; }
     }
 
     public class Thumbnail
@@ -131,16 +196,10 @@ namespace YoutubeMusicApi.Models.Search
         public BrowseEndpointContextSupportedConfigs BrowseEndpointContextSupportedConfigs { get; set; }
     }
 
-    public class Text
-    {
-        [JsonProperty("runs")]
-        public List<Run> Runs { get; set; }
-    }
-
     public class MusicResponsiveListItemFlexColumnRenderer
     {
         [JsonProperty("text")]
-        public Text Text { get; set; }
+        public RunsList Text { get; set; }
 
         [JsonProperty("displayPriority")]
         public string DisplayPriority { get; set; }
@@ -197,6 +256,12 @@ namespace YoutubeMusicApi.Models.Search
         public WatchEndpointMusicSupportedConfigs WatchEndpointMusicSupportedConfigs { get; set; }
     }
 
+    public class CreatePlaylistEndpoint
+    {
+        [JsonProperty("hack")]
+        public bool Hack { get; set; }
+    }
+
     public class NavigationEndpoint
     {
         [JsonProperty("clickTrackingParams")]
@@ -219,12 +284,15 @@ namespace YoutubeMusicApi.Models.Search
 
         [JsonProperty("searchEndpoint")]
         public SearchEndpoint SearchEndpoint { get; set; }
+
+        [JsonProperty("createPlaylistEndpoint")]
+        public CreatePlaylistEndpoint CreatePlaylistEndpoint { get; set; }
     }
 
     public class MenuNavigationItemRenderer
     {
         [JsonProperty("text")]
-        public Text Text { get; set; }
+        public RunsList Text { get; set; }
 
         [JsonProperty("icon")]
         public Icon Icon { get; set; }
@@ -236,7 +304,7 @@ namespace YoutubeMusicApi.Models.Search
         public string TrackingParams { get; set; }
     }
 
-    public class DefaultText
+    public class RunsList
     {
         [JsonProperty("runs")]
         public List<Run> Runs { get; set; }
@@ -305,12 +373,6 @@ namespace YoutubeMusicApi.Models.Search
         public LikeEndpoint LikeEndpoint { get; set; }
     }
 
-    public class ToggledText
-    {
-        [JsonProperty("runs")]
-        public List<Run> Runs { get; set; }
-    }
-
     public class ToggledIcon
     {
         [JsonProperty("iconType")]
@@ -332,7 +394,7 @@ namespace YoutubeMusicApi.Models.Search
     public class ToggleMenuServiceItemRenderer
     {
         [JsonProperty("defaultText")]
-        public DefaultText DefaultText { get; set; }
+        public RunsList DefaultText { get; set; }
 
         [JsonProperty("defaultIcon")]
         public DefaultIcon DefaultIcon { get; set; }
@@ -341,7 +403,7 @@ namespace YoutubeMusicApi.Models.Search
         public DefaultServiceEndpoint DefaultServiceEndpoint { get; set; }
 
         [JsonProperty("toggledText")]
-        public ToggledText ToggledText { get; set; }
+        public RunsList ToggledText { get; set; }
 
         [JsonProperty("toggledIcon")]
         public ToggledIcon ToggledIcon { get; set; }
@@ -362,16 +424,11 @@ namespace YoutubeMusicApi.Models.Search
         public string PlaylistId { get; set; }
     }
 
-    public class SuccessResponseText
-    {
-        [JsonProperty("runs")]
-        public List<Run> Runs { get; set; }
-    }
 
     public class NotificationTextRenderer
     {
         [JsonProperty("successResponseText")]
-        public SuccessResponseText SuccessResponseText { get; set; }
+        public RunsList SuccessResponseText { get; set; }
 
         [JsonProperty("trackingParams")]
         public string TrackingParams { get; set; }
@@ -425,7 +482,7 @@ namespace YoutubeMusicApi.Models.Search
     public class MenuServiceItemRenderer
     {
         [JsonProperty("text")]
-        public Text Text { get; set; }
+        public RunsList Text { get; set; }
 
         [JsonProperty("icon")]
         public Icon Icon { get; set; }
@@ -459,6 +516,9 @@ namespace YoutubeMusicApi.Models.Search
 
         [JsonProperty("trackingParams")]
         public string TrackingParams { get; set; }
+
+        [JsonProperty("accessibility")]
+        public AccessibilityDataContainer Accessibility { get; set; }
     }
 
     public class Menu
@@ -521,7 +581,7 @@ namespace YoutubeMusicApi.Models.Search
         public string Label { get; set; }
     }
 
-    public class AccessibilityDataXX
+    public class AccessibilityDataContainer
     {
         [JsonProperty("accessibilityData")]
         public AccessibilityDataLabel AccessibilityData { get; set; }
@@ -542,25 +602,25 @@ namespace YoutubeMusicApi.Models.Search
         public Icon PauseIcon { get; set; }
 
         [JsonProperty("iconColor")]
-        public object IconColor { get; set; }
+        public string IconColor { get; set; }
 
         [JsonProperty("backgroundColor")]
-        public int BackgroundColor { get; set; }
+        public string BackgroundColor { get; set; }
 
         [JsonProperty("activeBackgroundColor")]
-        public int ActiveBackgroundColor { get; set; }
+        public string ActiveBackgroundColor { get; set; }
 
         [JsonProperty("loadingIndicatorColor")]
-        public object LoadingIndicatorColor { get; set; }
+        public string LoadingIndicatorColor { get; set; }
 
         [JsonProperty("playingIcon")]
         public Icon PlayingIcon { get; set; }
 
         [JsonProperty("iconLoadingColor")]
-        public int IconLoadingColor { get; set; }
+        public string IconLoadingColor { get; set; }
 
         [JsonProperty("activeScaleFactor")]
-        public int ActiveScaleFactor { get; set; }
+        public double ActiveScaleFactor { get; set; }
 
         [JsonProperty("buttonSize")]
         public string ButtonSize { get; set; }
@@ -569,10 +629,10 @@ namespace YoutubeMusicApi.Models.Search
         public string RippleTarget { get; set; }
 
         [JsonProperty("accessibilityPlayData")]
-        public AccessibilityDataXX AccessibilityPlayData { get; set; }
+        public AccessibilityDataContainer AccessibilityPlayData { get; set; }
 
         [JsonProperty("accessibilityPauseData")]
-        public AccessibilityDataXX AccessibilityPauseData { get; set; }
+        public AccessibilityDataContainer AccessibilityPauseData { get; set; }
     }
 
     public class MusicItemThumbnailOverlayRenderer
@@ -629,12 +689,6 @@ namespace YoutubeMusicApi.Models.Search
         public List<FlexColumn> FixedColumns { get; set; }
     }
 
-    public class BottomText
-    {
-        [JsonProperty("runs")]
-        public List<Run> Runs { get; set; }
-    }
-
     public class BottomEndpoint
     {
         [JsonProperty("clickTrackingParams")]
@@ -647,7 +701,7 @@ namespace YoutubeMusicApi.Models.Search
     public class MusicShelfRenderer
     {
         [JsonProperty("title")]
-        public Title Title { get; set; }
+        public RunsList Title { get; set; }
 
         [JsonProperty("contents")]
         public List<Content> Contents { get; set; }
@@ -656,12 +710,12 @@ namespace YoutubeMusicApi.Models.Search
         public string TrackingParams { get; set; }
 
         [JsonProperty("bottomText")]
-        public BottomText BottomText { get; set; }
+        public RunsList BottomText { get; set; }
 
         [JsonProperty("bottomEndpoint")]
         public BottomEndpoint BottomEndpoint { get; set; }
     }
-    public class ReloadContinuationData
+    public class ContinuationData
     {
         [JsonProperty("continuation")]
         public string Continuation { get; set; }
@@ -673,7 +727,10 @@ namespace YoutubeMusicApi.Models.Search
     public class Continuation
     {
         [JsonProperty("reloadContinuationData")]
-        public ReloadContinuationData ReloadContinuationData { get; set; }
+        public ContinuationData ReloadContinuationData { get; set; }
+
+        [JsonProperty("nextContinuationData")]
+        public ContinuationData NextContinuationData { get; set; }
     }
 
     public class Style
@@ -688,7 +745,7 @@ namespace YoutubeMusicApi.Models.Search
         public Style Style { get; set; }
 
         [JsonProperty("text")]
-        public Text Text { get; set; }
+        public RunsList Text { get; set; }
 
         [JsonProperty("navigationEndpoint")]
         public NavigationEndpoint NavigationEndpoint { get; set; }
@@ -697,7 +754,7 @@ namespace YoutubeMusicApi.Models.Search
         public string TrackingParams { get; set; }
 
         [JsonProperty("accessibilityData")]
-        public AccessibilityDataXX AccessibilityData { get; set; }
+        public AccessibilityDataContainer AccessibilityData { get; set; }
     }
 
     public class Chip
@@ -725,6 +782,67 @@ namespace YoutubeMusicApi.Models.Search
     {
         [JsonProperty("chipCloudRenderer")]
         public ChipCloudRenderer ChipCloudRenderer { get; set; }
+
+        [JsonProperty("musicVisualHeaderRenderer")]
+        public MusicVisualHeaderRenderer MusicVisualHeaderRenderer { get; set; }
+
+        [JsonProperty("musicCarouselShelfBasicHeaderRenderer")]
+        public MusicCarouselShelfBasicHeaderRenderer MusicCarouselShelfBasicHeaderRenderer { get; set; }
+
+    }
+
+    public class MusicVisualHeaderRenderer
+    {
+        [JsonProperty("title")]
+        public RunsList Title { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("menu")]
+        public Menu Menu { get; set; }
+
+        [JsonProperty("foregroundThumbnail")]
+        public MusicThumbnailRenderer ForegroundThumbnail { get; set; }
+    }
+
+    public class MusicCarouselShelfBasicHeaderRenderer
+    {
+        [JsonProperty("title")]
+        public RunsList Title { get; set; }
+
+        [JsonProperty("accessibilityData")]
+        public AccessibilityDataContainer AccessibilityData { get; set; }
+
+        [JsonProperty("headerStyle")]
+        public string HeaderStyle { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("endIcons")]
+        public List<EndIcon> EndIcons { get; set; }
+    }
+
+    public class IconLinkRenderer
+    {
+        [JsonProperty("icon")]
+        public Icon Icon { get; set; }
+
+        [JsonProperty("tooltip")]
+        public RunsList Tooltip { get; set; }
+
+        [JsonProperty("navigationEndpoint")]
+        public NavigationEndpoint NavigationEndpoint { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+    }
+
+    public class EndIcon
+    {
+        [JsonProperty("iconLinkRenderer")]
+        public IconLinkRenderer IconLinkRenderer { get; set; }
     }
 
     public class SectionListRenderer
@@ -740,22 +858,65 @@ namespace YoutubeMusicApi.Models.Search
 
         [JsonProperty("header")]
         public Header Header { get; set; }
+
+        [JsonProperty("isCollapsible")]
+        public bool IsCollapsible { get; set; }
+
+        [JsonProperty("itemSize")]
+        public string ItemSize { get; set; }
+
+        [JsonProperty("items")]
+        public List<Content> Items { get; set; }
     }
 
-    public class Content
+    public class MusicTwoRowItemRenderer
     {
-        [JsonProperty("sectionListRenderer")]
-        public SectionListRenderer SectionListRenderer { get; set; }
+        [JsonProperty("thumbnailRenderer")]
+        public ThumbnailContainer ThumbnailRenderer { get; set; }
 
-        [JsonProperty("musicPlayButtonRenderer")]
-        public MusicPlayButtonRenderer MusicPlayButtonRenderer { get; set; }
+        [JsonProperty("aspectRatio")]
+        public string AspectRatio { get; set; }
 
-        [JsonProperty("musicResponsiveListItemRenderer")]
-        public MusicResponsiveListItemRenderer MusicResponsiveListItemRenderer { get; set; }
+        [JsonProperty("title")]
+        public RunsList Title { get; set; }
 
-        [JsonProperty("musicShelfRenderer")]
-        public MusicShelfRenderer MusicShelfRenderer { get; set; }
+        [JsonProperty("subtitle")]
+        public RunsList Subtitle { get; set; }
+
+        [JsonProperty("navigationEndpoint")]
+        public NavigationEndpoint NavigationEndpoint { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("accessibilityData")]
+        public AccessibilityDataContainer AccessibilityData { get; set; }
+
+        [JsonProperty("menu")]
+        public Menu Menu { get; set; }
+
+        [JsonProperty("thumbnailOverlay")]
+        public Overlay ThumbnailOverlay { get; set; }
     }
+
+    public class MusicCarouselShelfRenderer
+    {
+        [JsonProperty("header")]
+        public Header Header { get; set; }
+
+        [JsonProperty("contents")]
+        public List<Content> Contents { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("itemSize")]
+        public string ItemSize { get; set; }
+
+        [JsonProperty("backgroundOverlay")]
+        public Background BackgroundOverlay { get; set; }
+    }
+
 
     public class TabRenderer
     {
@@ -790,36 +951,8 @@ namespace YoutubeMusicApi.Models.Search
         public List<Tab> Tabs { get; set; }
     }
 
-    public class Contents
-    {
-        [JsonProperty("tabbedSearchResultsRenderer")]
-        public TabbedSearchResultsRenderer TabbedSearchResultsRenderer { get; set; }
-
-        [JsonProperty("sectionListRenderer")]
-        public SectionListRenderer SectionListRenderer { get; set; }
-    }
-
     public class AdSafetyReason
     {
-    }
-
-
-    public class GeneratedSearchResult
-    {
-        [JsonProperty("responseContext")]
-        public ResponseContext ResponseContext { get; set; }
-
-        [JsonProperty("estimatedResults")]
-        public string EstimatedResults { get; set; }
-
-        [JsonProperty("trackingParams")]
-        public string TrackingParams { get; set; }
-
-        [JsonProperty("contents")]
-        public Contents Contents { get; set; }
-
-        [JsonProperty("adSafetyReason")]
-        public AdSafetyReason AdSafetyReason { get; set; }
     }
 
 

@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using YoutubeMusicApi.Models.Generated;
 
 namespace YoutubeMusicApi.Models.Search
 {
@@ -36,7 +37,7 @@ namespace YoutubeMusicApi.Models.Search
         public List<SongResult> Songs { get; set; } = new List<SongResult>();
         public List<VideoResult> Videos { get; set; } = new List<VideoResult>();
 
-        public static SearchResult ParseResultListFromGenerated(GeneratedSearchResult result, SearchResultType filter)
+        public static SearchResult FromBrowseResponse(BrowseResponse result, SearchResultType filter)
         {
             SearchResult ret = new SearchResult();
             if (result.Contents == null)
@@ -49,10 +50,20 @@ namespace YoutubeMusicApi.Models.Search
             if (renderer == null)
             {
                 int indexToUse = filter == SearchResultType.Upload ? 1 : 0;
-                renderer = result.Contents.TabbedSearchResultsRenderer.Tabs[indexToUse].TabRenderer.Content.SectionListRenderer;
+
+                if (result.Contents.TabbedSearchResultsRenderer != null)
+                {
+                    renderer = result.Contents.TabbedSearchResultsRenderer.Tabs[indexToUse].TabRenderer.Content.SectionListRenderer;
+                }
+                else if (result.Contents.SingleColumnBrowseResultsRenderer != null)
+                {
+                    renderer = result.Contents.SingleColumnBrowseResultsRenderer.Tabs[indexToUse].TabRenderer.Content.SectionListRenderer;
+                }
+
                 if (renderer == null)
                 {
-                    return ret; // no results?
+                    // TODO: error ? throw ? 
+                    return ret; 
                 }
             }
 

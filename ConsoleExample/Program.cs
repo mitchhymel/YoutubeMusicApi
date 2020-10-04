@@ -12,15 +12,15 @@ namespace ConsoleExample
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Start");
+            Console.WriteLine("Start\n\n");
 
             YoutubeMusicClient api = new YoutubeMusicClient();
             api.LoginWithCookie(Secrets.COOKIE);
 
-            var res = await api.GetSong("I-jbGVAsEZg");
+            var res = await api.GetLibraryPlaylists(10);
             Console.WriteLine(JsonConvert.SerializeObject(res));
 
-            Console.WriteLine("Done");
+            Console.WriteLine("\n\nDone");
             Console.ReadLine();
         }
     }

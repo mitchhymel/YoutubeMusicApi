@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using YoutubeMusicApi.Models.Generated;
 
 namespace YoutubeMusicApi.Models.Search
 {
