@@ -64,9 +64,9 @@ namespace YoutubeMusicApi.Models.Search
                 //duration might be in fixedColumns
                 if (content.MusicResponsiveListItemRenderer.FixedColumns != null
                     && content.MusicResponsiveListItemRenderer.FixedColumns.Count > 0
-                    && content.MusicResponsiveListItemRenderer.FixedColumns[0].MusicResponsiveListItemFlexColumnRenderer != null)
+                    && content.MusicResponsiveListItemRenderer.FixedColumns[0].MusicResponsiveListItemFixedColumnRenderer != null)
                 {
-                    Duration = content.MusicResponsiveListItemRenderer.FixedColumns[0].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[0].Text;
+                    Duration = content.MusicResponsiveListItemRenderer.FixedColumns[0].MusicResponsiveListItemFixedColumnRenderer.Text.Runs[0].Text;
                 }
             }
         }

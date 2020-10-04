@@ -77,7 +77,30 @@ namespace YoutubeMusicApi.Models.Generated
 
         [JsonProperty("gridRenderer")]
         public SectionListRenderer GridRenderer;
+
+        [JsonProperty("musicPlaylistShelfRenderer")]
+        public MusicPlaylistShelfRenderer MusicPlaylistShelfRenderer { get; set; }
     }
+
+    public class MusicPlaylistShelfRenderer
+    { 
+        [JsonProperty("collapsedItemCount")]
+        public int CollapsedItemCount { get; set; }
+
+        [JsonProperty("contents")]
+        public List<Content> Contents;
+
+        [JsonProperty("contentsReorderable")]
+        public bool ContentsReorderable { get; set; }
+
+        [JsonProperty("playlistId")]
+        public string PlaylistId { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+    }
+
 
     public class Param
     {
@@ -176,6 +199,9 @@ namespace YoutubeMusicApi.Models.Generated
     {
         [JsonProperty("musicThumbnailRenderer")]
         public MusicThumbnailRenderer MusicThumbnailRenderer { get; set; }
+
+        [JsonProperty("croppedSquareThumbnailRenderer")]
+        public MusicThumbnailRenderer CroppedSquareThumbnailRenderer { get; set; }
     }
 
     public class BrowseEndpointContextMusicConfig
@@ -364,34 +390,10 @@ namespace YoutubeMusicApi.Models.Generated
         public List<Action> Actions { get; set; }
     }
 
-    public class DefaultServiceEndpoint
-    {
-        [JsonProperty("clickTrackingParams")]
-        public string ClickTrackingParams { get; set; }
-
-        [JsonProperty("feedbackEndpoint")]
-        public FeedbackEndpoint FeedbackEndpoint { get; set; }
-
-        [JsonProperty("likeEndpoint")]
-        public LikeEndpoint LikeEndpoint { get; set; }
-    }
-
     public class ToggledIcon
     {
         [JsonProperty("iconType")]
         public string IconType { get; set; }
-    }
-
-    public class ToggledServiceEndpoint
-    {
-        [JsonProperty("clickTrackingParams")]
-        public string ClickTrackingParams { get; set; }
-
-        [JsonProperty("feedbackEndpoint")]
-        public FeedbackEndpoint FeedbackEndpoint { get; set; }
-
-        [JsonProperty("likeEndpoint")]
-        public LikeEndpoint LikeEndpoint { get; set; }
     }
 
     public class ToggleMenuServiceItemRenderer
@@ -403,7 +405,7 @@ namespace YoutubeMusicApi.Models.Generated
         public DefaultIcon DefaultIcon { get; set; }
 
         [JsonProperty("defaultServiceEndpoint")]
-        public DefaultServiceEndpoint DefaultServiceEndpoint { get; set; }
+        public ServiceEndpoint DefaultServiceEndpoint { get; set; }
 
         [JsonProperty("toggledText")]
         public RunsList ToggledText { get; set; }
@@ -412,7 +414,7 @@ namespace YoutubeMusicApi.Models.Generated
         public ToggledIcon ToggledIcon { get; set; }
 
         [JsonProperty("toggledServiceEndpoint")]
-        public ToggledServiceEndpoint ToggledServiceEndpoint { get; set; }
+        public ServiceEndpoint ToggledServiceEndpoint { get; set; }
 
         [JsonProperty("trackingParams")]
         public string TrackingParams { get; set; }
@@ -480,6 +482,12 @@ namespace YoutubeMusicApi.Models.Generated
 
         [JsonProperty("getReportFormEndpoint")]
         public GetReportFormEndpoint GetReportFormEndpoint { get; set; }
+
+        [JsonProperty("likeEndpoint")]
+        public LikeEndpoint LikeEndpoint { get; set; }
+
+        [JsonProperty("feedbackEndpoint")]
+        public FeedbackEndpoint FeedbackEndpoint { get; set; }
     }
 
     public class MenuServiceItemRenderer
@@ -522,6 +530,31 @@ namespace YoutubeMusicApi.Models.Generated
 
         [JsonProperty("accessibility")]
         public AccessibilityDataContainer Accessibility { get; set; }
+
+        [JsonProperty("topLevelButtons")]
+        public List<TopLevelButton> TopLevelButtons { get; set; }
+    }
+    public class TopLevelButton
+    {
+        [JsonProperty("likeButtonRenderer")]
+        public LikeButtonRenderer LikeButtonRenderer { get; set; }
+    }
+    public class LikeButtonRenderer
+    {
+        [JsonProperty("target")]
+        public Target Target { get; set; }
+
+        [JsonProperty("likeStatus")]
+        public string LikeStatus { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("likesAllowed")]
+        public bool LikesAllowed { get; set; }
+
+        [JsonProperty("serviceEndpoints")]
+        public List<ServiceEndpoint> ServiceEndpoints { get; set; }
     }
 
     public class Menu
@@ -689,8 +722,36 @@ namespace YoutubeMusicApi.Models.Generated
         public Overlay Overlay { get; set; }
 
         [JsonProperty("fixedColumns")]
-        public List<FlexColumn> FixedColumns { get; set; }
+        public List<FixedColumn> FixedColumns { get; set; }
+
+        [JsonProperty("playlistItemData")]
+        public PlaylistItemData PlaylistItemData { get; set; }
     }
+
+    public class MusicResponsiveListItemFixedColumnRenderer
+    {
+        [JsonProperty("text")]
+        public RunsList Text { get; set; }
+
+        [JsonProperty("displayPriority")]
+        public string DisplayPriority { get; set; }
+
+        [JsonProperty("size")]
+        public string Size { get; set; }
+    }
+
+    public class FixedColumn
+    {
+        [JsonProperty("musicResponsiveListItemFixedColumnRenderer")]
+        public MusicResponsiveListItemFixedColumnRenderer MusicResponsiveListItemFixedColumnRenderer { get; set; }
+    }
+
+    public class PlaylistItemData
+    { 
+        [JsonProperty("playlistSetVideoId")]
+        public string PlaylistSetVideoId { get; set; }
+    }
+
 
     public class BottomEndpoint
     {
@@ -792,6 +853,132 @@ namespace YoutubeMusicApi.Models.Generated
         [JsonProperty("musicCarouselShelfBasicHeaderRenderer")]
         public MusicCarouselShelfBasicHeaderRenderer MusicCarouselShelfBasicHeaderRenderer { get; set; }
 
+        [JsonProperty("musicEditablePlaylistDetailHeaderRenderer")]
+        public MusicEditablePlaylistDetailHeaderRenderer MusicEditablePlaylistDetailHeaderRenderer { get; set; }
+
+        [JsonProperty("musicDetailHeaderRenderer")]
+        public MusicDetailHeaderRenderer MusicDetailHeaderRenderer { get; set; }
+
+    }
+
+    public class MusicDetailHeaderRenderer
+    {
+        [JsonProperty("title")]
+        public RunsList Title { get; set; }
+
+        [JsonProperty("subtitle")]
+        public RunsList Subtitle { get; set; }
+
+        [JsonProperty("menu")]
+        public Menu Menu { get; set; }
+
+        [JsonProperty("thumbnail")]
+        public ThumbnailContainer Thumbnail { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("moreButton")]
+        public MoreButton MoreButton { get; set; }
+
+        [JsonProperty("secondSubtitle")]
+        public RunsList SecondSubtitle { get; set; }
+
+        [JsonProperty("privacy")]
+        public string Privacy { get; set; }
+    }
+
+    public class MoreButton
+    {
+        [JsonProperty("toggleButtonRenderer")]
+        public ToggleButtonRenderer ToggleButtonRenderer { get; set; }
+    }
+
+    public class ToggleButtonRenderer
+    {
+        [JsonProperty("isToggled")]
+        public bool IsToggled { get; set; }
+
+        [JsonProperty("isDisabled")]
+        public bool IsDisabled { get; set; }
+
+        [JsonProperty("defaultIcon")]
+        public Icon DefaultIcon { get; set; }
+
+        [JsonProperty("defaultText")]
+        public RunsList DefaultText { get; set; }
+
+        [JsonProperty("toggledIcon")]
+        public Icon ToggledIcon { get; set; }
+
+        [JsonProperty("toggledText")]
+        public RunsList ToggledText { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+    }
+
+    public class MusicEditablePlaylistDetailHeaderRenderer
+    {
+        [JsonProperty("header")]
+        public Header Header { get; set; }
+
+        [JsonProperty("editHeader")]
+        public EditHeader EditHeader { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("playlistId")]
+        public string PlaylistId { get; set; }
+    }
+
+    public class EditHeader
+    {
+        [JsonProperty("musicPlaylistEditHeaderRenderer")]
+        public MusicPlaylistEditHeaderRenderer MusicPlaylistEditHeaderRenderer { get; set; }
+    }
+
+    public class MusicPlaylistEditHeaderRenderer
+    {
+        [JsonProperty("title")]
+        public RunsList Title { get; set; }
+
+        [JsonProperty("editTitle")]
+        public RunsList EditTitle { get; set; }
+
+        [JsonProperty("editDescription")]
+        public RunsList EditDescription { get; set; }
+
+        [JsonProperty("privacy")]
+        public string Privacy { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("playlistId")]
+        public string PlaylistId { get; set; }
+
+        [JsonProperty("collaborationSettingsCommand")]
+        public CollaborationSettingsCommand CollaborationSettingsCommand { get; set; }
+    }
+
+    public class CollaborationSettingsCommand
+    {
+        [JsonProperty("clickTrackingParams")]
+        public string ClickTrackingParams { get; set; }
+
+        [JsonProperty("playlistEditorEndpoint")]
+        public PlaylistEditorEndpoint PlaylistEditorEndpoint { get; set; }
+    }
+
+    public class PlaylistEditorEndpoint
+    {
+        [JsonProperty("playlistId")]
+        public string PlaylistId { get; set; }
+
+        [JsonProperty("openCollaborationPage")]
+        public bool OpenCollaborationPage { get; set; }
     }
 
     public class MusicVisualHeaderRenderer

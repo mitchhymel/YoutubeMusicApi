@@ -218,12 +218,7 @@ namespace YoutubeMusicApi
 
         public async Task<PlaylistList> GetLibraryPlaylists(int limit = 25, string continuation=null)
         {
-            string url = GetYTMUrl("browse");
-
-            if (continuation != null)
-            {
-                url += $"&ctoken={continuation}&continuation={continuation}";
-            }
+            string url = GetYTMUrl("browse", continuation);
 
             var data = JObject.FromObject(new
             {
@@ -301,12 +296,15 @@ namespace YoutubeMusicApi
             //return await Post<JObject>(url, data, authRequired: true);
         }
 
-        public async Task<JObject> GetPlaylist(string id)
+        public async Task<Playlist> GetPlaylist(string id, int limit=100, string continuation = null)
         {
-            throw new NotImplementedException();
-            //string url = GetYTMUrl("browse");
-            //var data = PrepareBrowse("PLAYLIST", id);
-            //return await Post<JObject>(url, data);
+            var browseId = id.StartsWith("VL") ? id : $"VL{id}";
+            string url = GetYTMUrl("browse", continuation);
+            var data = PrepareBrowse("PLAYLIST", browseId);
+            
+            var response = await Post<BrowseResponse>(url, data);
+
+            return Playlist.FromBrowseResponse(response);
         }
 
         public async Task<JObject> CreatePlaylist(string title, string description, string privacyStatus, List<string> videoIds = null, string sourcePlaylist = null)
@@ -498,9 +496,15 @@ namespace YoutubeMusicApi
             return sapisid;
         }
 
-        private string GetYTMUrl(string endpoint)
+        private string GetYTMUrl(string endpoint, string continuation = null)
         {
-            return $"{YoutubeMusicClientConstants.BaseUrl}/{endpoint}{YoutubeMusicClientConstants.Params}";
+            string url = $"{YoutubeMusicClientConstants.BaseUrl}/{endpoint}{YoutubeMusicClientConstants.Params}";
+            if (continuation != null)
+            {
+                url += $"&ctoken={continuation}&continuation={continuation}";
+            }
+
+            return url;
         }
 
         private JObject PrepareBrowse(string endpoint, string id)

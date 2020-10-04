@@ -17,7 +17,7 @@ namespace ConsoleExample
             YoutubeMusicClient api = new YoutubeMusicClient();
             api.LoginWithCookie(Secrets.COOKIE);
 
-            var res = await api.GetUser(Secrets.TEST_USERID);
+            var res = await api.GetPlaylist(Secrets.TEST_PLAYLISTID);
             Console.WriteLine(JsonConvert.SerializeObject(res));
 
             Console.WriteLine("\n\nDone");
