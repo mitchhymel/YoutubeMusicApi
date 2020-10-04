@@ -39,14 +39,6 @@ namespace YoutubeMusicApi.Models.Generated
         [JsonProperty("command")]
         public Command Command { get; set; }
     }
-    public class Command
-    {
-        [JsonProperty("clickTrackingParams")]
-        public string ClickTrackingParams { get; set; }
-
-        [JsonProperty("handlePlaylistDeletionCommand")]
-        public HandlePlaylistDeletionCommand HandlePlaylistDeletionCommand { get; set; }
-    }
 
     public class HandlePlaylistDeletionCommand
     {
@@ -475,6 +467,9 @@ namespace YoutubeMusicApi.Models.Generated
 
         [JsonProperty("addToToastAction")]
         public AddToToastAction AddToToastAction { get; set; }
+
+        [JsonProperty("handlePlaylistDeletionCommand")]
+        public HandlePlaylistDeletionCommand HandlePlaylistDeletionCommand { get; set; }
     }
 
     public class QueueAddEndpoint
