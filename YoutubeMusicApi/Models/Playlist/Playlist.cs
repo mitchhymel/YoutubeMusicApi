@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,7 +22,7 @@ namespace YoutubeMusicApi.Models
         public string Count { get; set; }
 
         [JsonProperty("privacy")]
-        public string Privacy { get; set; }
+        public PrivacyStatus Privacy { get; set; }
 
         [JsonProperty("author")]
         public IdNamePair Author { get; set; }
@@ -71,16 +72,24 @@ namespace YoutubeMusicApi.Models
             if (isUserPlaylist)
             {
                 header = response.Header.MusicEditablePlaylistDetailHeaderRenderer.Header;
-                playlist.Privacy = header.MusicDetailHeaderRenderer.Privacy;
+                playlist.Privacy = (PrivacyStatus)Enum.Parse(typeof(PrivacyStatus), header.MusicDetailHeaderRenderer.Privacy, true);
             }
             else
             {
                 header = response.Header;// not sure if right
-                playlist.Privacy = response.Header.MusicDetailHeaderRenderer.Privacy;
+                playlist.Privacy = (PrivacyStatus)Enum.Parse(typeof(PrivacyStatus), response.Header.MusicDetailHeaderRenderer.Privacy, true);
             }
 
             var authorRuns = header.MusicDetailHeaderRenderer.Subtitle.Runs;
-            playlist.Author = new IdNamePair(authorRuns[2].NavigationEndpoint.BrowseEndpoint.BrowseId, authorRuns[2].Text);
+            if (authorRuns[2].NavigationEndpoint == null)
+            {
+                // sometimes the author is "YouTube Music"
+                playlist.Author = new IdNamePair(authorRuns[2].Text, authorRuns[2].Text);
+            }
+            else
+            {
+                playlist.Author = new IdNamePair(authorRuns[2].NavigationEndpoint.BrowseEndpoint.BrowseId, authorRuns[2].Text);
+            }
 
             playlist.Title = header.MusicDetailHeaderRenderer.Title.Runs[0].Text;
 
@@ -93,12 +102,14 @@ namespace YoutubeMusicApi.Models
                 playlist.Duration = secondSubtitleRuns[2].Text;
             }
 
-            response.Contents.SingleColumnBrowseResultsRenderer.Tabs[0].TabRenderer.Content
-                .SectionListRenderer.Contents[0].MusicPlaylistShelfRenderer.Contents.ForEach(x =>
+            contents.Contents.ForEach(x =>
                 playlist.Tracks.Add(PlaylistTrack.FromMusicResponsiveListItemRenderer(x.MusicResponsiveListItemRenderer))
             );
 
-            // TODO continuation
+            if (contents.Continuations != null)
+            {
+                playlist.Continuation = contents.Continuations[0].NextContinuationData.Continuation;
+            }
 
             return playlist;
         }
@@ -134,7 +145,12 @@ namespace YoutubeMusicApi.Models
         {
             PlaylistTrack track = new PlaylistTrack();
 
-            track.SetVideoId = renderer.PlaylistItemData.PlaylistSetVideoId;
+            // if this is not your playlist, it won't have setvideoids for tracks because you can't edit it
+            if (renderer.PlaylistItemData != null)
+            {
+                track.SetVideoId = renderer.PlaylistItemData.PlaylistSetVideoId;
+            }
+
             track.Thumbnails = renderer.Thumbnail.MusicThumbnailRenderer.Thumbnail.Thumbnails;
             track.Duration = renderer.FixedColumns[0].MusicResponsiveListItemFixedColumnRenderer.Text.Runs[0].Text;
 
@@ -142,16 +158,33 @@ namespace YoutubeMusicApi.Models
             track.VideoId = renderer.FlexColumns[0].MusicResponsiveListItemFlexColumnRenderer.Text.Runs[0].NavigationEndpoint.WatchEndpoint.VideoId;
 
             var artistRuns = renderer.FlexColumns[1].MusicResponsiveListItemFlexColumnRenderer.Text.Runs;
-            artistRuns.ForEach(x =>
-                track.Artists.Add(new IdNamePair(x.NavigationEndpoint.BrowseEndpoint.BrowseId, x.Text))
-            );
+            foreach (var run in artistRuns)
+            {
+                if (run.NavigationEndpoint != null && run.Text != ", ")
+                {
+                    track.Artists.Add(new IdNamePair(run.NavigationEndpoint.BrowseEndpoint.BrowseId, run.Text));
+                }
+            }
 
+            // sometimes album is not included
             var albumRuns = renderer.FlexColumns[2].MusicResponsiveListItemFlexColumnRenderer.Text.Runs;
-            track.Album = new IdNamePair(albumRuns[0].NavigationEndpoint.BrowseEndpoint.BrowseId, albumRuns[0].Text);
+            if (albumRuns != null && albumRuns[0].Text != null && albumRuns[0].NavigationEndpoint != null)
+            {
+                track.Album = new IdNamePair(albumRuns[0].NavigationEndpoint.BrowseEndpoint.BrowseId, albumRuns[0].Text);
+            }
 
             track.LikeStatus = renderer.Menu.MenuRenderer.TopLevelButtons[0].LikeButtonRenderer.LikeStatus;
 
             return track;
         }
     }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum PrivacyStatus
+    { 
+        Public,
+        Private,
+        Unlisted,
+    }
+
 }

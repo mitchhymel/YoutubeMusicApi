@@ -307,35 +307,55 @@ namespace YoutubeMusicApi
             return Playlist.FromBrowseResponse(response);
         }
 
-        public async Task<JObject> CreatePlaylist(string title, string description, string privacyStatus, List<string> videoIds = null, string sourcePlaylist = null)
+        public async Task<string> CreatePlaylist(string title, string description, PrivacyStatus privacyStatus = PrivacyStatus.Private, List<string> videoIds = null, string sourcePlaylist = null)
         {
-            throw new NotImplementedException();
-            //string url = GetYTMUrl("playlist/create");
-            //var data = JObject.FromObject(new
-            //{
-            //    title = title,
-            //    description = description,
-            //    privacyStatus = privacyStatus,
-            //    // videoIds = videoIds,
-            //    // sourcePlaylist = sourcePlaylist
-            //});
-            //return await Post<JObject>(url, data, authRequired: true);
+            string url = GetYTMUrl("playlist/create");
+            var data = JObject.FromObject(new
+            {
+                title = title,
+                description = description,
+                privacyStatus = privacyStatus,
+            });
+
+            if (videoIds != null)
+            {
+                data.Merge(JObject.FromObject(new
+                {
+                    videoIds = videoIds
+                }));
+            }
+
+            if (sourcePlaylist != null)
+            {
+                data.Merge(JObject.FromObject(new
+                {
+                    sourcePlaylist = sourcePlaylist
+                }));
+            }
+
+            var response = await Post<BrowseResponse>(url, data, authRequired: true);
+            return response.PlaylistId;
         }
 
-        public async Task<JObject> EditPlaylist(string playlistId, string title = null, string description = null, string privacyStatus = null, Tuple<string, string> moveItem = null, string addPlaylistId = null)
+        public async Task<JObject> EditPlaylist(string playlistId, string title = null, string description = null, PrivacyStatus privacyStatus = PrivacyStatus.Private, Tuple<string, string> moveItem = null, string addPlaylistId = null)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<JObject> DeletePlaylist(string playlistId)
+        public async Task<bool> DeletePlaylist(string playlistId)
         {
-            throw new NotImplementedException();
-            //string url = GetYTMUrl("playlist/delete");
-            //var data = JObject.FromObject(new
-            //{
-            //    playlistId = playlistId
-            //});
-            //return await Post<JObject>(url, data, authRequired: true);
+            string url = GetYTMUrl("playlist/delete");
+            var data = JObject.FromObject(new
+            {
+                playlistId = playlistId
+            });
+            var response = await Post<BrowseResponse>(url, data, authRequired: true);
+
+            bool success = response.Command != null
+                && response.Command.HandlePlaylistDeletionCommand != null
+                && response.Command.HandlePlaylistDeletionCommand.PlaylistId != null;
+
+            return success;
         }
 
         public async Task<JObject> AddPlaylistItems(string playlistId, List<string> videoIds, string sourcePlaylist=null, bool duplicates=false)

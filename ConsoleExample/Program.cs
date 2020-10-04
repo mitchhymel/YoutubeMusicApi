@@ -5,6 +5,7 @@ using YoutubeMusicApi;
 using YoutubeMusicApi.Models;
 using YoutubeMusicApi.Logging;
 using YoutubeMusicApi.Models.Search;
+using System.Collections.Generic;
 
 namespace ConsoleExample
 {
@@ -17,7 +18,7 @@ namespace ConsoleExample
             YoutubeMusicClient api = new YoutubeMusicClient();
             api.LoginWithCookie(Secrets.COOKIE);
 
-            var res = await api.GetPlaylist(Secrets.TEST_PLAYLISTID);
+            var res = await api.DeletePlaylist("PLlDZzckf6t0hVN5gzu0TV2JYhtilToSFB");
             Console.WriteLine(JsonConvert.SerializeObject(res));
 
             Console.WriteLine("\n\nDone");

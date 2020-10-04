@@ -32,6 +32,26 @@ namespace YoutubeMusicApi.Models.Generated
 
         [JsonProperty("header")]
         public Header Header { get; set; }
+
+        [JsonProperty("playlistId")]
+        public string PlaylistId { get; set; }
+
+        [JsonProperty("command")]
+        public Command Command { get; set; }
+    }
+    public class Command
+    {
+        [JsonProperty("clickTrackingParams")]
+        public string ClickTrackingParams { get; set; }
+
+        [JsonProperty("handlePlaylistDeletionCommand")]
+        public HandlePlaylistDeletionCommand HandlePlaylistDeletionCommand { get; set; }
+    }
+
+    public class HandlePlaylistDeletionCommand
+    {
+        [JsonProperty("playlistId")]
+        public string PlaylistId { get; set; }
     }
 
     public class ContinuationContents
@@ -98,6 +118,9 @@ namespace YoutubeMusicApi.Models.Generated
 
         [JsonProperty("trackingParams")]
         public string TrackingParams { get; set; }
+
+        [JsonProperty("continuations")]
+        public List<Continuation> Continuations { get; set; }
 
     }
 
