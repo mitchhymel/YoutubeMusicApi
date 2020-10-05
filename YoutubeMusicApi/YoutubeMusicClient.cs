@@ -199,11 +199,6 @@ namespace YoutubeMusicApi
             return User.FromBrowseResponse(response);
         }
 
-        public async Task<JObject> GetUserPlaylists(string channelId, string parameters)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<JObject> GetAlbum(string browseId)
         {
             throw new NotImplementedException();
@@ -222,7 +217,7 @@ namespace YoutubeMusicApi
 
         #region Library
 
-        public async Task<PlaylistList> GetLibraryPlaylists(int limit = 25, string continuation=null)
+        public async Task<PlaylistList> GetLibraryPlaylists(string continuation=null)
         {
             string url = GetYTMUrl("browse", continuation);
 
@@ -236,73 +231,175 @@ namespace YoutubeMusicApi
             return PlaylistList.FromBrowseResponse(response);
         }
 
-        public async Task<JObject> GetLibrarySongs(int limit = 25)
+        // TODO: Not Tested
+        public async Task<JObject> GetLibrarySongs(string continuation=null)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse", continuation);
+
+            var data = JObject.FromObject(new
+            {
+                browseId = "FEmusic_liked_videos"
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
-        public async Task<JObject> GetLibraryAlbums(int limit = 25)
+        // TODO: Not Tested
+        public async Task<JObject> GetLibraryAlbums(string continuation=null)
         {
-            throw new NotImplementedException();
+            
+            string url = GetYTMUrl("browse", continuation);
+
+            var data = JObject.FromObject(new
+            {
+                browseId = "FEmusic_liked_albums"
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
-        public async Task<JObject> GetLibrarySubscriptions(int limit = 25)
+        // TODO: Not Tested
+        public async Task<JObject> GetLibraryArtists(string continuation=null)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse", continuation);
+
+            var data = JObject.FromObject(new
+            {
+                browseId = "FEmusic_library_corpus_track_artists"
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
-        public async Task<JObject> GetLikedSongs(int limit = 100)
+        // TODO: Not Tested
+        public async Task<JObject> GetLibrarySubscriptions(string continuation=null)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse", continuation);
+
+            var data = JObject.FromObject(new
+            {
+                browseId = "FEmusic_library_corpus_artists"
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
+        // TODO: Not Tested
+        public async Task<Playlist> GetLikedSongs(string continuation=null)
+        {
+            return await GetPlaylist("LM", continuation: continuation);
+        }
+
+        // TODO: Not Tested
         public async Task<JObject> GetHistory()
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse");
+
+            var data = JObject.FromObject(new
+            {
+                browseId = "FEmusic_history"
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
+
+        // TODO: Not Tested
         public async Task<JObject> RemoveHistoryItems(List<string> feedbackTokens)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("feedback");
+
+            var data = JObject.FromObject(new
+            {
+                feedbackTokens = feedbackTokens
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
-        public async Task<JObject> RateSong(string videoId, string rating)
+        // TODO: Not Tested
+        public async Task<JObject> RateSong(string videoId, LikeStatus rating)
         {
-            throw new NotImplementedException();
-        }
+            string url = GetYTMUrl(PrepareLikeEndpoint(rating));
 
-        public async Task<JObject> RatePlaylist(string playlistId, string rating)
+            var data = JObject.FromObject(new
+            {
+                target = JObject.FromObject(new
+                {
+                    videoId = videoId
+                })
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
+        }
+        
+        // TODO: Not Tested
+        public async Task<JObject> RatePlaylist(string playlistId, LikeStatus rating)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl(PrepareLikeEndpoint(rating));
+
+            var data = JObject.FromObject(new
+            {
+                target = JObject.FromObject(new
+                {
+                    playlistId = playlistId
+                })
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
+        // TODO: Not Tested
         public async Task<JObject> SubscribeArtists(List<string> channelIds)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("subscription/subscribe");
+
+            var data = JObject.FromObject(new
+            {
+                channelIds = channelIds
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
+        // TODO: Not Tested
         public async Task<JObject> UnsubscribeArtists(List<string> channelIds)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("subscription/unsubscribe");
+
+            var data = JObject.FromObject(new
+            {
+                channelIds = channelIds
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
         #endregion
 
         #region Playlists
 
-        public async Task<JObject> GetLikedPlaylists()
-        {
-            throw new NotImplementedException();
-            //string url = GetYTMUrl("browse");
-            //var data = JObject.FromObject(new
-            //{
-            //    browseId = "FEmusic_liked_playlists"
-            //});
-
-            //return await Post<JObject>(url, data, authRequired: true);
-        }
-
-        public async Task<Playlist> GetPlaylist(string id, int limit=100, string continuation = null)
+        public async Task<Playlist> GetPlaylist(string id, string continuation = null)
         {
             var browseId = id.StartsWith("VL") ? id : $"VL{id}";
             string url = GetYTMUrl("browse", continuation);
@@ -531,6 +628,22 @@ namespace YoutubeMusicApi
             }
 
             return url;
+        }
+
+        private string PrepareLikeEndpoint(LikeStatus status)
+        {
+            switch (status)
+            {
+                case LikeStatus.Like:
+                    return "like/like";
+                case LikeStatus.Dislike:
+                    return "like/dislike";
+                case LikeStatus.Indifferent:
+                    return "like/removelike";
+                default:
+                    throw new Exception($"Unsupported likestatus value {status}");
+            }
+
         }
 
         private JObject PrepareBrowse(string endpoint, string id)

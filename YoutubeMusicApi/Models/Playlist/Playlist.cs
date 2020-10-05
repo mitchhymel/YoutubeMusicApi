@@ -18,14 +18,14 @@ namespace YoutubeMusicApi.Models
         [JsonProperty("thumbnails")]
         public List<Thumbnail> Thumbnails { get; set; }
 
+        [JsonProperty("author")]
+        public IdNamePair Author { get; set; }
+
         [JsonProperty("count")]
         public string Count { get; set; }
 
         [JsonProperty("privacy")]
         public PrivacyStatus Privacy { get; set; }
-
-        [JsonProperty("author")]
-        public IdNamePair Author { get; set; }
 
         [JsonProperty("duration")]
         public string Duration { get; set; }
@@ -44,7 +44,7 @@ namespace YoutubeMusicApi.Models
         /// </summary>
         /// <param name="renderer"></param>
         /// <returns></returns>
-        public static Playlist FromContent(MusicTwoRowItemRenderer renderer)
+        public static Playlist FromMusicTwoRowItemRenderer(MusicTwoRowItemRenderer renderer)
         {
             Playlist playlist = new Playlist();
 
@@ -130,7 +130,7 @@ namespace YoutubeMusicApi.Models
         public IdNamePair Album { get; set; }
 
         [JsonProperty("likeStatus")]
-        public string LikeStatus { get; set; }
+        public LikeStatus LikeStatus { get; set; }
 
         [JsonProperty("thumbnails")]
         public List<Thumbnail> Thumbnails { get; set; } = new List<Thumbnail>();
@@ -173,7 +173,7 @@ namespace YoutubeMusicApi.Models
                 track.Album = new IdNamePair(albumRuns[0].NavigationEndpoint.BrowseEndpoint.BrowseId, albumRuns[0].Text);
             }
 
-            track.LikeStatus = renderer.Menu.MenuRenderer.TopLevelButtons[0].LikeButtonRenderer.LikeStatus;
+            track.LikeStatus = (LikeStatus) Enum.Parse(typeof(LikeStatus), renderer.Menu.MenuRenderer.TopLevelButtons[0].LikeButtonRenderer.LikeStatus);
 
             return track;
         }

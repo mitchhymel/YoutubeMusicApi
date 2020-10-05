@@ -23,7 +23,7 @@ namespace YoutubeMusicApi.Models
             var contents = response.Contents.SingleColumnBrowseResultsRenderer.Tabs[0].TabRenderer.Content.SectionListRenderer.Contents[0].MusicCarouselShelfRenderer.Contents;
             foreach (var content in contents)
             {
-                user.Playlists.Add(Playlist.FromContent(content.MusicTwoRowItemRenderer));
+                user.Playlists.Add(Playlist.FromMusicTwoRowItemRenderer(content.MusicTwoRowItemRenderer));
             }
 
             return user;

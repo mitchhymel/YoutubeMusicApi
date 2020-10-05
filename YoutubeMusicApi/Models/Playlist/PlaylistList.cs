@@ -35,7 +35,7 @@ namespace YoutubeMusicApi.Models
                 // ... not sure what this is, but we want to skip it
                 if (item.MusicTwoRowItemRenderer.NavigationEndpoint.CreatePlaylistEndpoint == null)
                 {
-                    list.Playlists.Add(Playlist.FromContent(item.MusicTwoRowItemRenderer));
+                    list.Playlists.Add(Playlist.FromMusicTwoRowItemRenderer(item.MusicTwoRowItemRenderer));
                 }
             }
 

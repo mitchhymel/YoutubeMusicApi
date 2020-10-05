@@ -125,7 +125,7 @@ namespace YoutubeMusicApi.Models
         public IdNamePair Album { get; set; }
 
         [JsonProperty("likeStatus")]
-        public string LikeStatus { get; set; }
+        public LikeStatus LikeStatus { get; set; }
 
         [JsonProperty("thumbnails")]
         public List<Thumbnail> Thumbnails { get; set; }
@@ -152,7 +152,7 @@ namespace YoutubeMusicApi.Models
             var albumRuns = renderer.FlexColumns[2].MusicResponsiveListItemFlexColumnRenderer.Text.Runs;
             song.Album = new IdNamePair(albumRuns[0].NavigationEndpoint.BrowseEndpoint.BrowseId, albumRuns[0].Text);
 
-            song.LikeStatus = renderer.Menu.MenuRenderer.TopLevelButtons[0].LikeButtonRenderer.LikeStatus;
+            song.LikeStatus = (LikeStatus) Enum.Parse(typeof(LikeStatus), renderer.Menu.MenuRenderer.TopLevelButtons[0].LikeButtonRenderer.LikeStatus);
 
             return song;
         }
