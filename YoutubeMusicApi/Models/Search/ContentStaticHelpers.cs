@@ -114,15 +114,7 @@ namespace YoutubeMusicApi.Models.Search
 
         public static List<Thumbnail> GetThumbnails(Content content)
         {
-            List<Thumbnail> thumbnails = new List<Thumbnail>();
-            content.MusicResponsiveListItemRenderer.Thumbnail.MusicThumbnailRenderer.Thumbnail.Thumbnails.ForEach(x => thumbnails.Add(new Thumbnail()
-            {
-                Height = x.Height,
-                Url = x.Url,
-                Width = x.Width
-            }));
-
-            return thumbnails;
+            return content.MusicResponsiveListItemRenderer.Thumbnail.MusicThumbnailRenderer.Thumbnail.Thumbnails;
         }
 
         public static bool BrowseIdIndicatedUpload(string browseId)

@@ -163,15 +163,21 @@ namespace YoutubeMusicApi
 
         #region Browsing
 
-        public async Task<SearchResult> GetArtist(string id)
+        /// <summary>
+        /// Gets the artist with provided id
+        /// </summary>
+        /// <param name="id">artist id</param>
+        /// <param name="authRequired">Use if you want to get subscribed information</param>
+        /// <returns></returns>
+        public async Task<Artist> GetArtist(string id, bool authRequired=false)
         {
             string url = GetYTMUrl("browse");
 
             var data = PrepareBrowse("ARTIST", id);
 
-            var response = await Post<BrowseResponse>(url, data);
+            var response = await Post<BrowseResponse>(url, data, authRequired: true);
 
-            return SearchResult.FromBrowseResponse(response, SearchResultType.All);
+            return Artist.FromBrowseResponse(response);
         }
 
         public async Task<JObject> GetArtistAlbums(string channelId, string parameters)

@@ -236,6 +236,9 @@ namespace YoutubeMusicApi.Models.Generated
         [JsonProperty("browseId")]
         public string BrowseId { get; set; }
 
+        [JsonProperty("params")]
+        public string Params { get; set; }
+
         [JsonProperty("browseEndpointContextSupportedConfigs")]
         public BrowseEndpointContextSupportedConfigs BrowseEndpointContextSupportedConfigs { get; set; }
     }
@@ -391,6 +394,51 @@ namespace YoutubeMusicApi.Models.Generated
 
         [JsonProperty("musicLibraryStatusUpdateCommand")]
         public MusicLibraryStatusUpdateCommand MusicLibraryStatusUpdateCommand { get; set; }
+
+        [JsonProperty("openPopupAction")]
+        public OpenPopupAction OpenPopupAction { get; set; }
+    }
+
+    public class OpenPopupAction
+    {
+        [JsonProperty("popup")]
+        public Popup Popup { get; set; }
+
+        [JsonProperty("popupType")]
+        public string PopupType { get; set; }
+    }
+
+    public class Popup
+    {
+        [JsonProperty("confirmDialogRenderer")]
+        public ConfirmDialogRenderer ConfirmDialogRenderer { get; set; }
+    }
+
+    public class ConfirmDialogRenderer
+    {
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("dialogMessages")]
+        public List<RunsList> DialogMessages { get; set; }
+
+        [JsonProperty("confirmButton")]
+        public ConfirmButton ConfirmButton { get; set; }
+
+        [JsonProperty("cancelButton")]
+        public CancelButton CancelButton { get; set; }
+    }
+
+    public class CancelButton
+    {
+        [JsonProperty("buttonRenderer")]
+        public ButtonRenderer ButtonRenderer { get; set; }
+    }
+
+    public class ConfirmButton
+    {
+        [JsonProperty("buttonRenderer")]
+        public ButtonRenderer ButtonRenderer { get; set; }
     }
 
     public class LikeEndpoint
@@ -506,6 +554,39 @@ namespace YoutubeMusicApi.Models.Generated
 
         [JsonProperty("feedbackEndpoint")]
         public FeedbackEndpoint FeedbackEndpoint { get; set; }
+
+        [JsonProperty("subscribeEndpoint")]
+        public SubscribeEndpoint SubscribeEndpoint { get; set; }
+
+        [JsonProperty("signalServiceEndpoint")]
+        public SignalServiceEndpoint SignalServiceEndpoint { get; set; }
+
+        [JsonProperty("unsubscribeEndpoint")]
+        public UnsubscribeEndpoint UnsubscribeEndpoint { get; set; }
+    }
+
+    public class UnsubscribeEndpoint
+    {
+        [JsonProperty("channelIds")]
+        public List<string> ChannelIds { get; set; }
+    }
+
+    public class SubscribeEndpoint
+    {
+        [JsonProperty("channelIds")]
+        public List<string> ChannelIds { get; set; }
+
+        [JsonProperty("params")]
+        public string Params { get; set; }
+    }
+
+    public class SignalServiceEndpoint
+    {
+        [JsonProperty("signal")]
+        public string Signal { get; set; }
+
+        [JsonProperty("actions")]
+        public List<Action> Actions { get; set; }
     }
 
     public class MenuServiceItemRenderer
@@ -877,6 +958,147 @@ namespace YoutubeMusicApi.Models.Generated
         [JsonProperty("musicDetailHeaderRenderer")]
         public MusicDetailHeaderRenderer MusicDetailHeaderRenderer { get; set; }
 
+        [JsonProperty("musicImmersiveHeaderRenderer")]
+        public MusicImmersiveHeaderRenderer MusicImmersiveHeaderRenderer { get; set; }
+
+    }
+
+    public class MusicImmersiveHeaderRenderer
+    {
+        [JsonProperty("title")]
+        public RunsList Title { get; set; }
+
+        [JsonProperty("subscriptionButton")]
+        public SubscriptionButton SubscriptionButton { get; set; }
+
+        [JsonProperty("moreButton")]
+        public MoreButton MoreButton { get; set; }
+
+        [JsonProperty("menu")]
+        public Menu Menu { get; set; }
+
+        [JsonProperty("thumbnail")]
+        public ThumbnailContainer Thumbnail { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("playButton")]
+        public PlayButton PlayButton { get; set; }
+
+        [JsonProperty("startRadioButton")]
+        public StartRadioButton StartRadioButton { get; set; }
+
+        [JsonProperty("shareEndpoint")]
+        public ShareEndpoint ShareEndpoint { get; set; }
+    }
+
+    public class SubscriptionButton
+    {
+        [JsonProperty("subscribeButtonRenderer")]
+        public SubscribeButtonRenderer SubscribeButtonRenderer { get; set; }
+    }
+
+    public class PlayButton
+    {
+        [JsonProperty("buttonRenderer")]
+        public ButtonRenderer ButtonRenderer { get; set; }
+    }
+
+    public class ButtonRenderer
+    {
+        [JsonProperty("text")]
+        public RunsList Text { get; set; }
+
+        [JsonProperty("icon")]
+        public Icon Icon { get; set; }
+
+        [JsonProperty("navigationEndpoint")]
+        public NavigationEndpoint NavigationEndpoint { get; set; }
+
+        [JsonProperty("accessibility")]
+        public AccessibilityDataLabel Accessibility { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("accessibilityData")]
+        public AccessibilityDataContainer AccessibilityData { get; set; }
+
+        [JsonProperty("style")]
+        public string Style { get; set; }
+
+        [JsonProperty("size")]
+        public string Size { get; set; }
+
+        [JsonProperty("serviceEndpoint")]
+        public ServiceEndpoint ServiceEndpoint { get; set; }
+    }
+
+    public class SubscribeButtonRenderer
+    {
+        [JsonProperty("subscriberCountText")]
+        public RunsList SubscriberCountText { get; set; }
+
+        [JsonProperty("subscribed")]
+        public bool Subscribed { get; set; }
+
+        [JsonProperty("enabled")]
+        public bool Enabled { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        [JsonProperty("channelId")]
+        public string ChannelId { get; set; }
+
+        [JsonProperty("showPreferences")]
+        public bool ShowPreferences { get; set; }
+
+        [JsonProperty("subscriberCountWithUnsubscribeText")]
+        public RunsList SubscriberCountWithUnsubscribeText { get; set; }
+
+        [JsonProperty("subscribedButtonText")]
+        public RunsList SubscribedButtonText { get; set; }
+
+        [JsonProperty("unsubscribedButtonText")]
+        public RunsList UnsubscribedButtonText { get; set; }
+
+        [JsonProperty("trackingParams")]
+        public string TrackingParams { get; set; }
+
+        [JsonProperty("unsubscribeButtonText")]
+        public RunsList UnsubscribeButtonText { get; set; }
+
+        [JsonProperty("serviceEndpoints")]
+        public List<ServiceEndpoint> ServiceEndpoints { get; set; }
+
+        [JsonProperty("longSubscriberCountText")]
+        public RunsList LongSubscriberCountText { get; set; }
+
+        [JsonProperty("shortSubscriberCountText")]
+        public RunsList ShortSubscriberCountText { get; set; }
+
+        [JsonProperty("subscribeAccessibility")]
+        public AccessibilityDataContainer SubscribeAccessibility { get; set; }
+
+        [JsonProperty("unsubscribeAccessibility")]
+        public AccessibilityDataContainer UnsubscribeAccessibility { get; set; }
+    }
+
+    public class StartRadioButton
+    {
+        [JsonProperty("buttonRenderer")]
+        public ButtonRenderer ButtonRenderer { get; set; }
+    }
+
+    public class ShareEndpoint
+    {
+        [JsonProperty("clickTrackingParams")]
+        public string ClickTrackingParams { get; set; }
+
+        [JsonProperty("shareEntityEndpoint")]
+        public ShareEntityEndpoint ShareEntityEndpoint { get; set; }
     }
 
     public class MusicDetailHeaderRenderer
