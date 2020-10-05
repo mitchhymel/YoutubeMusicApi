@@ -175,13 +175,15 @@ namespace YoutubeMusicApi
 
             var data = PrepareBrowse("ARTIST", id);
 
-            var response = await Post<BrowseResponse>(url, data, authRequired: true);
+            var response = await Post<BrowseResponse>(url, data, authRequired: authRequired);
 
             return Artist.FromBrowseResponse(response);
         }
 
         public async Task<JObject> GetArtistAlbums(string channelId, string parameters)
         {
+            // TODO: is this API even needed?
+            // albums are returned by getartist, not sure what the params arg is...
             throw new NotImplementedException();
         }
 
@@ -199,9 +201,16 @@ namespace YoutubeMusicApi
             return User.FromBrowseResponse(response);
         }
 
+        // TODO: Not tested
         public async Task<JObject> GetAlbum(string browseId)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse");
+
+            var data = PrepareBrowse("ALBUM", browseId);
+
+            var response = await Post<JObject>(url, data);
+
+            return response;
         }
 
         public async Task<Song> GetSong(string videoId)
@@ -440,9 +449,66 @@ namespace YoutubeMusicApi
             return response.PlaylistId;
         }
 
-        public async Task<JObject> EditPlaylist(string playlistId, string title = null, string description = null, PrivacyStatus privacyStatus = PrivacyStatus.Private, Tuple<string, string> moveItem = null, string addPlaylistId = null)
+        // TODO: Not tested
+        public async Task<JObject> EditPlaylist(string playlistId, string title = null, string description = null, PrivacyStatus? privacyStatus = null, Tuple<string, string> moveItem = null, string addPlaylistId = null)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse/edit_playlist");
+
+            List<JObject> actionsList = new List<JObject>();
+
+            if (title != null)
+            {
+                actionsList.Add(JObject.FromObject(new
+                {
+                    action = "ACTION_SET_PLAYLIST_NAME",
+                    playlistName = title
+                }));
+            }
+
+            if (description != null)
+            {
+                actionsList.Add(JObject.FromObject(new
+                {
+                    action = "ACTION_SET_PLAYLIST_DESCRIPTION",
+                    playlistDescription = description
+                }));
+            }
+
+            if (privacyStatus != null)
+            {
+                actionsList.Add(JObject.FromObject(new
+                {
+                    action = "ACTION_SET_PLAYLIST_PRIVACY",
+                    playlistPrivacy = privacyStatus
+                }));
+            }
+
+            if (moveItem != null)
+            {
+                actionsList.Add(JObject.FromObject(new
+                {
+                    action = "ACTION_MOVE_VIDEO_BEFORE",
+                    setVideoId = moveItem.Item1,
+                    moveSetVideoIdSuccessor = moveItem.Item2
+                }));
+            }
+
+            if (addPlaylistId != null)
+            {
+                actionsList.Add(JObject.FromObject(new
+                {
+                    action = "ACTION_ADD_PLAYLIST",
+                    addedFullListId = addPlaylistId
+                }));
+            }
+
+            var data = JObject.FromObject(new
+            {
+                playlistId = playlistId,
+                actions = actionsList,
+            });
+
+            return await Post<JObject>(url, data, authRequired: true);
         }
 
         public async Task<bool> DeletePlaylist(string playlistId)
@@ -461,51 +527,149 @@ namespace YoutubeMusicApi
             return success;
         }
 
+        // TODO: Not tested
         public async Task<JObject> AddPlaylistItems(string playlistId, List<string> videoIds, string sourcePlaylist=null, bool duplicates=false)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse/edit_playlist");
+
+            List<JObject> actionsList = new List<JObject>();
+
+            foreach (var video in videoIds)
+            {
+                var action = JObject.FromObject(new
+                {
+                    action = "ACTION_ADD_VIDEO",
+                    addedVideoId = video,
+                });
+
+                if (duplicates)
+                {
+                    action.Add("dedupeOption", JToken.FromObject("DEDUPE_OPTION_SKIP"));
+                }
+
+                actionsList.Add(action);
+            }
+
+            if (sourcePlaylist != null)
+            {
+                actionsList.Add(JObject.FromObject(new
+                {
+                    action = "ACTION_ADD_PLAYLIST",
+                    addedFullListId = sourcePlaylist
+                }));
+            }
+
+            var data = JObject.FromObject(new
+            {
+                playlistId = playlistId,
+                actions = actionsList,
+            });
+
+            return await Post<JObject>(url, data, authRequired: true);
         }
 
-        public async Task<JObject> RemovePlaylistItems(string playlistId,  List<object> videos)
+        // TODO: Not tested
+        public async Task<JObject> RemovePlaylistItems(string playlistId,  List<PlaylistTrack> videos)
         {
-            throw new NotImplementedException();
-            //string url = GetYTMUrl("browse/edit_playlist");
+            string url = GetYTMUrl("browse/edit_playlist");
 
-            //List<JObject> actionsList = new List<JObject>();
+            List<JObject> actionsList = new List<JObject>();
 
-            //var data = JObject.FromObject(new
-            //{
+            foreach (var video in videos)
+            {
+                if (video.SetVideoId == null)
+                {
+                    throw new Exception($"Cannot remove song from playlist that you don't have permission to. PlaylistId={playlistId}, video={video.VideoId}");
+                }
 
-            //});
-            //return await Post<JObject>(url, data, authRequired: true);
+                actionsList.Add(JObject.FromObject(new
+                {
+                    setVideoId = video.SetVideoId,
+                    removeVideoId = video.VideoId,
+                    action = "ACTION_REMOVE_VIDEO",
+                }));
+            }
+
+            var data = JObject.FromObject(new
+            {
+                playlistId = playlistId,
+                actions = actionsList,
+            });
+
+            return await Post<JObject>(url, data, authRequired: true);
         }
 
         #endregion
 
         #region Uploads
-        public async Task<JObject> GetUploadedSongs(int limit=25)
+
+        // TODO: Not tested
+        public async Task<JObject> GetUploadedSongs(string continuation = null)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse", continuation: continuation);
+
+            var data = JObject.FromObject(new
+            {
+                browseId = "FEmusic_library_privately_owned_tracks"
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
-        public async Task<JObject> GetUploadedAlbums(int limit=25)
+        // TODO: Not tested
+        public async Task<JObject> GetUploadedAlbums(string continuation = null)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse", continuation: continuation);
+
+            var data = JObject.FromObject(new
+            {
+                browseId = "FEmusic_library_privately_owned_releases"
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
-        public async Task<JObject> GetUploadedArtists(int limit=25)
+        // TODO: Not tested
+        public async Task<JObject> GetUploadedArtists(string continuation = null)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse", continuation: continuation);
+
+            var data = JObject.FromObject(new
+            {
+                browseId = "FEmusic_library_privately_owned_artists"
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
+        // TODO: Not tested
         public async Task<JObject> GetUploadedArtist(string artistBrowseId)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse");
+
+            var data = PrepareBrowse("ARTIST", artistBrowseId);
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
+        // TODO: Not tested
         public async Task<JObject> GetUploadedAlbum(string albumBrowseId)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("browse");
+
+            var data = PrepareBrowse("ALBUM", albumBrowseId);
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
         public async Task<JObject> UploadSong(string filePath)
@@ -513,9 +677,21 @@ namespace YoutubeMusicApi
             throw new NotImplementedException();
         }
 
-        public async Task<JObject> DeleteUpload(string uploadId)
+        // TODO: Not tested
+        public async Task<JObject> DeleteUpload(string entityId)
         {
-            throw new NotImplementedException();
+            string url = GetYTMUrl("music/delete_privately_owned_entity");
+
+            entityId.Replace("FEmusic_library_privately_owned_release_detail", "");
+
+            var data = JObject.FromObject(new
+            {
+                entityId = entityId
+            });
+
+            var response = await Post<JObject>(url, data, authRequired: true);
+
+            return response;
         }
 
 
