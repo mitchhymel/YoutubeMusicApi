@@ -19,7 +19,11 @@ namespace YoutubeMusicApi.Models
             if (response.ContinuationContents != null)
             {
                 contents = response.ContinuationContents.GridContinuation.Items;
-                list.Continuation = response.ContinuationContents.GridContinuation.Continuations[0].NextContinuationData.Continuation;
+
+                if (response.ContinuationContents.GridContinuation.Continuations != null)
+                {
+                    list.Continuation = response.ContinuationContents.GridContinuation.Continuations[0].NextContinuationData.Continuation;
+                }
             }
             else
             {

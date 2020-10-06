@@ -38,6 +38,9 @@ namespace YoutubeMusicApi.Models.Generated
 
         [JsonProperty("command")]
         public Command Command { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
     }
 
     public class HandlePlaylistDeletionCommand

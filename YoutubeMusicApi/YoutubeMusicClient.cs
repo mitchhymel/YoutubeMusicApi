@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -408,13 +409,13 @@ namespace YoutubeMusicApi
 
         #region Playlists
 
-        public async Task<Playlist> GetPlaylist(string id, string continuation = null)
+        public async Task<Playlist> GetPlaylist(string id, string continuation = null, bool authRequired = false)
         {
-            var browseId = id.StartsWith("VL") ? id : $"VL{id}";
+            var browseId = id.StartsWith("PL") ? id : id.StartsWith("VL") ? id : $"VL{id}";
             string url = GetYTMUrl("browse", continuation);
             var data = PrepareBrowse("PLAYLIST", browseId);
             
-            var response = await Post<BrowseResponse>(url, data);
+            var response = await Post<BrowseResponse>(url, data, authRequired: authRequired);
 
             return Playlist.FromBrowseResponse(response);
         }
@@ -527,9 +528,9 @@ namespace YoutubeMusicApi
             return success;
         }
 
-        // TODO: Not tested
-        public async Task<JObject> AddPlaylistItems(string playlistId, List<string> videoIds, string sourcePlaylist=null, bool duplicates=false)
+        public async Task<bool> AddPlaylistItems(string playlistId, List<string> videoIds, string sourcePlaylist=null, bool duplicates=false)
         {
+            var browseId = TrimPlaylistIdForEdit(playlistId);
             string url = GetYTMUrl("browse/edit_playlist");
 
             List<JObject> actionsList = new List<JObject>();
@@ -561,16 +562,21 @@ namespace YoutubeMusicApi
 
             var data = JObject.FromObject(new
             {
-                playlistId = playlistId,
+                playlistId = browseId,
                 actions = actionsList,
             });
 
-            return await Post<JObject>(url, data, authRequired: true);
+            var response = await Post<BrowseResponse>(url, data, authRequired: true);
+
+            // TODO: update BrowseResponse to have fields this endpoint returns
+            // like newHeader, actions
+            // also consider returning more info than just a bool
+            return response.Status == "STATUS_SUCEEDED";
         }
 
-        // TODO: Not tested
-        public async Task<JObject> RemovePlaylistItems(string playlistId,  List<PlaylistTrack> videos)
+        public async Task<bool> RemovePlaylistItems(string playlistId,  List<PlaylistTrack> videos)
         {
+            var browseId = TrimPlaylistIdForEdit(playlistId);
             string url = GetYTMUrl("browse/edit_playlist");
 
             List<JObject> actionsList = new List<JObject>();
@@ -592,11 +598,16 @@ namespace YoutubeMusicApi
 
             var data = JObject.FromObject(new
             {
-                playlistId = playlistId,
+                playlistId = browseId,
                 actions = actionsList,
             });
 
-            return await Post<JObject>(url, data, authRequired: true);
+            // TODO: update BrowseResponse to have fields this endpoint returns
+            // like newHeader, actions
+            // also consider returning more info than just a bool
+            var response = await Post<BrowseResponse>(url, data, authRequired: true);
+
+            return response.Status == "STATUS_SUCCEEDED";
         }
 
         #endregion
@@ -744,6 +755,12 @@ namespace YoutubeMusicApi
             Log($"\tBODY: {requestBody}");
             var response = await client.PostAsync(url, content);
             var responseString = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Request failed with response: {responseString}");
+            }
+
             Log($"\tRESPONSE: {responseString}");
             T result = JsonConvert.DeserializeObject<T>(responseString);
             return result;
@@ -751,7 +768,9 @@ namespace YoutubeMusicApi
 
         private HttpClient GetHttpClient(bool authRequired = false)
         {
-            HttpClient client = new HttpClient();
+            var httpClientHandler = new HttpClientHandler() { UseCookies = false };
+            HttpClient client = new HttpClient(httpClientHandler);
+
             client.DefaultRequestHeaders.Clear();
             client.DefaultRequestHeaders.Add("User-Agent", AuthHeaders.UserAgent);
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue(AuthHeaders.Accept));
@@ -843,6 +862,11 @@ namespace YoutubeMusicApi
             {
                 Logger.Log(str);
             }
+        }
+
+        private string TrimPlaylistIdForEdit(string playlistId)
+        {
+            return playlistId.StartsWith("VL") ? playlistId.Substring(2, playlistId.Length-1) : playlistId;
         }
 
         #endregion

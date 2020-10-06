@@ -72,12 +72,19 @@ namespace YoutubeMusicApi.Models
             if (isUserPlaylist)
             {
                 header = response.Header.MusicEditablePlaylistDetailHeaderRenderer.Header;
-                playlist.Privacy = (PrivacyStatus)Enum.Parse(typeof(PrivacyStatus), header.MusicDetailHeaderRenderer.Privacy, true);
             }
             else
             {
                 header = response.Header;// not sure if right
-                playlist.Privacy = (PrivacyStatus)Enum.Parse(typeof(PrivacyStatus), response.Header.MusicDetailHeaderRenderer.Privacy, true);
+            }
+
+            if (header.MusicDetailHeaderRenderer != null && header.MusicDetailHeaderRenderer.Privacy != null)
+            {
+                playlist.Privacy = (PrivacyStatus)Enum.Parse(typeof(PrivacyStatus), header.MusicDetailHeaderRenderer.Privacy, true);
+            }
+            else
+            {
+                playlist.Privacy = PrivacyStatus.Public;
             }
 
             var authorRuns = header.MusicDetailHeaderRenderer.Subtitle.Runs;
@@ -102,9 +109,12 @@ namespace YoutubeMusicApi.Models
                 playlist.Duration = secondSubtitleRuns[2].Text;
             }
 
-            contents.Contents.ForEach(x =>
-                playlist.Tracks.Add(PlaylistTrack.FromMusicResponsiveListItemRenderer(x.MusicResponsiveListItemRenderer))
-            );
+            if (contents.Contents != null)
+            {
+                contents.Contents.ForEach(x =>
+                    playlist.Tracks.Add(PlaylistTrack.FromMusicResponsiveListItemRenderer(x.MusicResponsiveListItemRenderer))
+                );
+            }
 
             if (contents.Continuations != null)
             {
@@ -173,7 +183,7 @@ namespace YoutubeMusicApi.Models
                 track.Album = new IdNamePair(albumRuns[0].NavigationEndpoint.BrowseEndpoint.BrowseId, albumRuns[0].Text);
             }
 
-            track.LikeStatus = (LikeStatus) Enum.Parse(typeof(LikeStatus), renderer.Menu.MenuRenderer.TopLevelButtons[0].LikeButtonRenderer.LikeStatus);
+            track.LikeStatus = (LikeStatus) Enum.Parse(typeof(LikeStatus), renderer.Menu.MenuRenderer.TopLevelButtons[0].LikeButtonRenderer.LikeStatus, true);
 
             return track;
         }
